@@ -489,7 +489,7 @@ class ReactExoplayerView extends FrameLayout implements
             youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
         }
         if (analyticsMeta.hasKey("contentPlaybackType")){
-            youboraOptions.setContentPlaybackType(analyticsMeta.getString('contentPlaybackType'));
+            youboraOptions.setContentPlaybackType(analyticsMeta.getString("contentPlaybackType"));
         }
         youboraOptions.setAutoDetectBackground(true);
 
