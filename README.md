@@ -1,5 +1,8 @@
 ## react-native-video
 
+### Branching strategy:
+master-tv branch has Penthera SDK switched off from the code, so please push all common changes coming from master to master-tv too.
+
 A `<Video>` component for react-native, as seen in
 [react-native-login](https://github.com/brentvatne/react-native-login)!
 
