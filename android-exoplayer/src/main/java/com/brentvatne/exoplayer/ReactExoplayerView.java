@@ -75,11 +75,11 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.SeekParameters;
-import com.penthera.virtuososdk.client.IAsset;
-import com.penthera.virtuososdk.client.IIdentifier;
-import com.penthera.virtuososdk.client.ISegmentedAsset;
-import com.penthera.virtuososdk.client.Virtuoso;
-import com.penthera.virtuososdk.support.exoplayer213.drm.ExoplayerDrmSessionManager;
+// import com.penthera.virtuososdk.client.IAsset;
+// import com.penthera.virtuososdk.client.IIdentifier;
+// import com.penthera.virtuososdk.client.ISegmentedAsset;
+// import com.penthera.virtuososdk.client.Virtuoso;
+// import com.penthera.virtuososdk.support.exoplayer213.drm.ExoplayerDrmSessionManager;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -577,14 +577,14 @@ class ReactExoplayerView extends FrameLayout implements
                             return;
                         }
                     }
-                    else if (extension.equals("download")) {
-                        try {
-                            drmSessionManager = buildDrmSessionManager(self.assetId);
-                        } catch (Exception e) {
-                            eventEmitter.error("Failed to setup downloads DRM", e);
-                            return;
-                        }
-                    }
+//                     else if (extension.equals("download")) {
+//                         try {
+//                             drmSessionManager = buildDrmSessionManager(self.assetId);
+//                         } catch (Exception e) {
+//                             eventEmitter.error("Failed to setup downloads DRM", e);
+//                             return;
+//                         }
+//                     }
                     // End DRM
 
                     ArrayList<MediaSource> mediaSourceList = buildTextSources();
@@ -620,42 +620,42 @@ class ReactExoplayerView extends FrameLayout implements
         }, 1);
     }
 
-    private DrmSessionManager buildDrmSessionManager(String assetId) {
-        if (assetId == null) {
-            return null;
-        }
-        Virtuoso virtuoso = new Virtuoso(getContext());
-
-        IAsset asset = null;
-
-        List<IIdentifier> list = virtuoso.getAssetManager().getByAssetId(assetId);
-        if (list != null && list.size() > 0) {
-            asset = (IAsset) list.get(0);
-        }
-
-        ISegmentedAsset segmentedAsset = asset instanceof ISegmentedAsset ? (ISegmentedAsset) asset : null;
-
-        if (segmentedAsset != null) {
-            String drmUuid = segmentedAsset.contentProtectionUuid();
-            if (drmUuid != null) {
-                UUID drmSchemeUuid = null;
-                if (!TextUtils.isEmpty(drmUuid))
-                    drmSchemeUuid = Util.getDrmUuid(drmUuid);
-
-                if (drmSchemeUuid != null) {
-                    try {
-                        return new ExoplayerDrmSessionManager(getContext(), drmSchemeUuid, segmentedAsset, null, null, null, new int[0], true);
-
-                    } catch (com.penthera.virtuososdk.client.drm.UnsupportedDrmException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-        }
-
-        return null;
-    }
+//     private DrmSessionManager buildDrmSessionManager(String assetId) {
+//         if (assetId == null) {
+//             return null;
+//         }
+//         Virtuoso virtuoso = new Virtuoso(getContext());
+//
+//         IAsset asset = null;
+//
+//         List<IIdentifier> list = virtuoso.getAssetManager().getByAssetId(assetId);
+//         if (list != null && list.size() > 0) {
+//             asset = (IAsset) list.get(0);
+//         }
+//
+//         ISegmentedAsset segmentedAsset = asset instanceof ISegmentedAsset ? (ISegmentedAsset) asset : null;
+//
+//         if (segmentedAsset != null) {
+//             String drmUuid = segmentedAsset.contentProtectionUuid();
+//             if (drmUuid != null) {
+//                 UUID drmSchemeUuid = null;
+//                 if (!TextUtils.isEmpty(drmUuid))
+//                     drmSchemeUuid = Util.getDrmUuid(drmUuid);
+//
+//                 if (drmSchemeUuid != null) {
+//                     try {
+//                         return new ExoplayerDrmSessionManager(getContext(), drmSchemeUuid, segmentedAsset, null, null, null, new int[0], true);
+//
+//                     } catch (com.penthera.virtuososdk.client.drm.UnsupportedDrmException e) {
+//                         e.printStackTrace();
+//                     }
+//                 }
+//
+//             }
+//         }
+//
+//         return null;
+//     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid,
                                                      String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
