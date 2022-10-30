@@ -28,7 +28,7 @@ android {
 
 dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    implementation('com.google.android.exoplayer:exoplayer:2.13.2') {
+    implementation('com.google.android.exoplayer:exoplayer:2.13.3') {
         exclude group: 'com.android.support'
     }
 
@@ -41,7 +41,7 @@ dependencies {
     implementation 'com.penthera:cnc-android-sdk:4.0.1'
     implementation 'com.penthera:cnc-exoplayer-2_13-support:4.0.1'
 
-    implementation('com.google.android.exoplayer:extension-okhttp:2.13.2') {
+    implementation('com.google.android.exoplayer:extension-okhttp:2.13.3') {
         exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
     implementation 'com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}'
