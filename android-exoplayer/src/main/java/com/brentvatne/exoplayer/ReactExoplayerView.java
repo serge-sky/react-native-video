@@ -174,8 +174,6 @@ class ReactExoplayerView extends FrameLayout implements
     private String assetId = null;
     private boolean controls;
     private ReadableMap analyticsMeta;
-    private boolean isATVActiveApp = false;
-    private boolean isAndroidTV = false;
     // \ End props
 
     // React
@@ -869,16 +867,10 @@ class ReactExoplayerView extends FrameLayout implements
     public void onAudioFocusChange(int focusChange) {
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_LOSS:
-                if (isAndroidTV && isATVActiveApp) {
-                    audioManager.requestAudioFocus(this,
-                        AudioManager.STREAM_MUSIC,
-                        AudioManager.AUDIOFOCUS_GAIN);
-                } else {
-                    this.hasAudioFocus = false;
-                    eventEmitter.audioFocusChanged(false);
-                    pausePlayback();
-                    audioManager.abandonAudioFocus(this);
-                }
+                this.hasAudioFocus = false;
+                eventEmitter.audioFocusChanged(false);
+                pausePlayback();
+                audioManager.abandonAudioFocus(this);
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 eventEmitter.audioFocusChanged(false);
@@ -1548,14 +1540,6 @@ class ReactExoplayerView extends FrameLayout implements
             youboraPlugin.getAdapter().fireStop();
             initialiseYoubora();
         }
-    }
-
-    public void setAndroidTV(boolean isAndroidTV) {
-        this.isAndroidTV = isAndroidTV;
-    }
-
-    public void setATVActiveApp(boolean isATVActiveApp) {
-        this.isATVActiveApp = isATVActiveApp;
     }
 
     public void setAssetId(String assetId){
