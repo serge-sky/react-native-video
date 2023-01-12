@@ -1201,6 +1201,12 @@ class ReactExoplayerView extends FrameLayout implements
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             this.requestHeaders);
             if (!isSourceEqual) {
+                analyticsMeta = null;
+                if (youboraPlugin != null){
+                    youboraPlugin.getAdapter().unregisterListeners();
+                    youboraPlugin.getAdapter().fireStop();
+                    youboraPlugin = null;
+                }
                 reloadSource();
             }
         }
@@ -1535,7 +1541,9 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
-
+        if(player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
+            initialiseYoubora();
+        }
         if(player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
             youboraPlugin.getAdapter().fireStop();
             initialiseYoubora();
