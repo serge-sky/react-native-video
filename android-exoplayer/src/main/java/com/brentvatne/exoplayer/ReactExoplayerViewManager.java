@@ -344,9 +344,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_ANALYTICS_META)
     public void setAnalyticsMeta(final ReactExoplayerView videoView, @Nullable ReadableMap analyticsMeta) {
-        if (analyticsMeta != null) {
-            videoView.setAnalyticsMeta(analyticsMeta);
-        }
+        videoView.setAnalyticsMeta(analyticsMeta);
     }
 
     private boolean startsWithValidScheme(String uriString) {
