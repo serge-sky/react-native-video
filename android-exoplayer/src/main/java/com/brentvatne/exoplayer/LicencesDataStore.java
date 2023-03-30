@@ -1,4 +1,4 @@
-package main.java.com.brentvatne.exoplayer;
+package com.brentvatne.exoplayer;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
