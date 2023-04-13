@@ -72,6 +72,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_ANALYTICS_META = "analyticsMeta";
+    private static final String PROP_LICENCE_PERSISTENCE_ENABLED = "licencePersistenceEnabled";
 
     private ReactExoplayerConfig config;
 
@@ -345,6 +346,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_ANALYTICS_META)
     public void setAnalyticsMeta(final ReactExoplayerView videoView, @Nullable ReadableMap analyticsMeta) {
         videoView.setAnalyticsMeta(analyticsMeta);
+    }
+
+    @ReactProp(name = PROP_LICENCE_PERSISTENCE_ENABLED, defaultBoolean = true)
+    public void setPropLicencePersistenceEnabled(final ReactExoplayerView videoView, final boolean isEnabled) {
+        videoView.setLicencePersistingEnabled(isEnabled);
     }
 
     private boolean startsWithValidScheme(String uriString) {
