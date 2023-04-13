@@ -82,9 +82,6 @@ import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter;
 import com.npaw.youbora.lib6.plugin.Options;
 import com.npaw.youbora.lib6.plugin.Plugin;
 
-import LicencesDataStore;
-import DataSourceUtil;
-
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
