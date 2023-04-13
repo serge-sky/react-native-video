@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
@@ -127,6 +128,7 @@ class ReactExoplayerView extends FrameLayout implements
     private SimpleExoPlayer player;
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
+    private boolean playerNeedsNewLicence;
 
     private int resumeWindow;
     private long resumePosition;
@@ -234,7 +236,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void createViews() {
         clearResumePosition();
-        LicencesDataStore.init(getContext());
+        com.brentvatne.exoplayer.LicencesDataStore.init(getContext());
         mediaDataSourceFactory = buildDataSourceFactory(true);
         httpDataSourceFactory = buildHttpDataSourceFactory(false);
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
@@ -679,7 +681,7 @@ class ReactExoplayerView extends FrameLayout implements
                 null, false, 3);
 
         if (licencePersistingEnabled) {
-            byte[] key = LicencesDataStore.getLicence(this.assetId);
+            byte[] key = com.brentvatne.exoplayer.LicencesDataStore.getLicence(this.assetId);
             if (key != null) {
                 drmSessionManager.setMode(MODE_PLAYBACK, key);
             }
@@ -1162,6 +1164,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
         eventEmitter.error(errorString, ex);
         playerNeedsSource = true;
+        playerNeedsNewLicence = true;
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
             initializePlayer();
@@ -1617,8 +1620,9 @@ class ReactExoplayerView extends FrameLayout implements
     @SuppressLint("CheckResult")
     private void cacheLicense() {
         if (licencePersistingEnabled) {
-            byte[] existingLicense = LicencesDataStore.getLicence(assetId);
-            if (existingLicense == null) {
+            Map<String, String> existingLicense = com.brentvatne.exoplayer.LicencesDataStore.getCachedLicence(assetId);
+            boolean licenceServerChanged = existingLicense != null && !drmLicenseUrl.equals(existingLicense.get(com.brentvatne.exoplayer.LicencesDataStore.LICENCE_URL));
+            if (existingLicense == null || playerNeedsNewLicence || licenceServerChanged) {
                 Single.fromCallable(() -> {
                             try {
                                 HttpDataSource httpDataSource = httpDataSourceFactory.createDataSource();
@@ -1628,8 +1632,11 @@ class ReactExoplayerView extends FrameLayout implements
                                         .newWidevineInstance(drmLicenseUrl, true, httpDataSourceFactory, new DrmSessionEventListener.EventDispatcher());
 
                                 if (assetId != null && !"".equals(assetId) && drmInitDataFormat != null) {
-                                    // val licenseDuration = offlineLicenseHelper.getLicenseDurationRemainingSec(LICENSES_KEY_CACHE.getValue(assetId))
-                                    return offlineLicenseHelper.downloadLicense(drmInitDataFormat);
+                                    byte[] key = offlineLicenseHelper.downloadLicense(drmInitDataFormat);
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                                        Pair<Long, Long> licenseDuration = offlineLicenseHelper.getLicenseDurationRemainingSec(key);
+                                    }
+                                    return key;
                                 }
                                 return null;
 
@@ -1642,7 +1649,8 @@ class ReactExoplayerView extends FrameLayout implements
                         .observeOn(AndroidSchedulers.mainThread()).subscribe(new DisposableSingleObserver<byte[]>() {
                             @Override
                             public void onSuccess(byte[] license) {
-                                LicencesDataStore.storeLicense(assetId, license);
+                                com.brentvatne.exoplayer.LicencesDataStore.storeLicense(assetId, drmLicenseUrl, license);
+                                playerNeedsNewLicence = false;
                             }
 
                             @Override
