@@ -82,6 +82,9 @@ import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter;
 import com.npaw.youbora.lib6.plugin.Options;
 import com.npaw.youbora.lib6.plugin.Plugin;
 
+import LicencesDataStore;
+import DataSourceUtil;
+
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -114,14 +117,14 @@ class ReactExoplayerView extends FrameLayout implements
         DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
     }
 
-    private final com.brentvatne.exoplayer.VideoEventEmitter eventEmitter;
-    private final com.brentvatne.exoplayer.ReactExoplayerConfig config;
+    private final VideoEventEmitter eventEmitter;
+    private final ReactExoplayerConfig config;
     private final DefaultBandwidthMeter bandwidthMeter;
     private PlayerControlView playerControlView;
     private View playPauseControlContainer;
     private Player.EventListener eventListener;
 
-    private com.brentvatne.exoplayer.ExoPlayerView exoPlayerView;
+    private ExoPlayerView exoPlayerView;
 
     private HttpDataSource.Factory httpDataSourceFactory;
     private DataSource.Factory mediaDataSourceFactory;
@@ -213,10 +216,10 @@ class ReactExoplayerView extends FrameLayout implements
         return window.windowStartTimeMs + currentPosition;
     }
 
-    public ReactExoplayerView(ThemedReactContext context, com.brentvatne.exoplayer.ReactExoplayerConfig config) {
+    public ReactExoplayerView(ThemedReactContext context, ReactExoplayerConfig config) {
         super(context);
         this.themedReactContext = context;
-        this.eventEmitter = new com.brentvatne.exoplayer.VideoEventEmitter(context);
+        this.eventEmitter = new VideoEventEmitter(context);
         this.config = config;
         this.bandwidthMeter = config.getBandwidthMeter();
 
@@ -236,7 +239,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void createViews() {
         clearResumePosition();
-        com.brentvatne.exoplayer.LicencesDataStore.init(getContext());
+        LicencesDataStore.init(getContext());
         mediaDataSourceFactory = buildDataSourceFactory(true);
         httpDataSourceFactory = buildHttpDataSourceFactory(false);
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
@@ -246,7 +249,7 @@ class ReactExoplayerView extends FrameLayout implements
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
-        exoPlayerView = new com.brentvatne.exoplayer.ExoPlayerView(getContext());
+        exoPlayerView = new ExoPlayerView(getContext());
         exoPlayerView.setLayoutParams(layoutParams);
 
         addView(exoPlayerView, 0, layoutParams);
@@ -681,7 +684,7 @@ class ReactExoplayerView extends FrameLayout implements
                 null, false, 3);
 
         if (licencePersistingEnabled) {
-            byte[] key = com.brentvatne.exoplayer.LicencesDataStore.getLicence(this.assetId);
+            byte[] key = LicencesDataStore.getLicence(this.assetId);
             if (key != null) {
                 drmSessionManager.setMode(MODE_PLAYBACK, key);
             }
@@ -862,7 +865,7 @@ class ReactExoplayerView extends FrameLayout implements
      * @return A new DataSource factory.
      */
     private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter) {
-        return com.brentvatne.exoplayer.DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext,
+        return DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext,
                 useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
     }
 
@@ -874,7 +877,7 @@ class ReactExoplayerView extends FrameLayout implements
      * @return A new HttpDataSource factory.
      */
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {
-        return com.brentvatne.exoplayer.DataSourceUtil.getDefaultHttpDataSourceFactory(this.themedReactContext, useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
+        return DataSourceUtil.getDefaultHttpDataSourceFactory(this.themedReactContext, useBandwidthMeter ? bandwidthMeter : null, requestHeaders);
     }
 
 
@@ -1216,7 +1219,7 @@ class ReactExoplayerView extends FrameLayout implements
             this.extension = extension;
             this.requestHeaders = headers;
             this.mediaDataSourceFactory =
-                    com.brentvatne.exoplayer.DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
+                    DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             this.requestHeaders);
             if (!isSourceEqual) {
                 analyticsMeta = null;
@@ -1273,7 +1276,7 @@ class ReactExoplayerView extends FrameLayout implements
         initializePlayer();
     }
 
-    public void setResizeModeModifier(@com.brentvatne.exoplayer.ResizeMode.Mode int resizeMode) {
+    public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
         exoPlayerView.setResizeMode(resizeMode);
     }
 
@@ -1620,8 +1623,8 @@ class ReactExoplayerView extends FrameLayout implements
     @SuppressLint("CheckResult")
     private void cacheLicense() {
         if (licencePersistingEnabled) {
-            Map<String, String> existingLicense = com.brentvatne.exoplayer.LicencesDataStore.getCachedLicence(assetId);
-            boolean licenceServerChanged = existingLicense != null && !drmLicenseUrl.equals(existingLicense.get(com.brentvatne.exoplayer.LicencesDataStore.LICENCE_URL));
+            Map<String, String> existingLicense = LicencesDataStore.getCachedLicence(assetId);
+            boolean licenceServerChanged = existingLicense != null && !drmLicenseUrl.equals(existingLicense.get(LicencesDataStore.LICENCE_URL));
             if (existingLicense == null || playerNeedsNewLicence || licenceServerChanged) {
                 Single.fromCallable(() -> {
                             try {
@@ -1649,7 +1652,7 @@ class ReactExoplayerView extends FrameLayout implements
                         .observeOn(AndroidSchedulers.mainThread()).subscribe(new DisposableSingleObserver<byte[]>() {
                             @Override
                             public void onSuccess(byte[] license) {
-                                com.brentvatne.exoplayer.LicencesDataStore.storeLicense(assetId, drmLicenseUrl, license);
+                                LicencesDataStore.storeLicense(assetId, drmLicenseUrl, license);
                                 playerNeedsNewLicence = false;
                             }
 
