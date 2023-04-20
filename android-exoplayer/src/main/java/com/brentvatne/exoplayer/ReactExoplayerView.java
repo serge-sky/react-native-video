@@ -1575,7 +1575,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setLicencePersistingEnabled(boolean isEnabled) {
-        this.licencePersistingEnabled = isEnabled;
+        this.licencePersistingEnabled = true;
     }
 
     @Override
@@ -1640,7 +1640,7 @@ class ReactExoplayerView extends FrameLayout implements
                                 }
                                 return null;
 
-                            } catch (IOException e) {
+                            } catch (Exception e) {
                                 Log.i("DRM LICENCE CACHING", "Failed to acquire offline license", e);
                             }
 
@@ -1656,6 +1656,9 @@ class ReactExoplayerView extends FrameLayout implements
                             @Override
                             public void onError(Throwable e) {
                                 Log.i("DRM LICENCE CACHING", "Failed to acquire offline license", e);
+                                if (existingLicense != null) {
+                                    LicencesDataStore.removeLicence(assetId);
+                                }
                             }
                         });
             }
