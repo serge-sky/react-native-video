@@ -1575,7 +1575,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setLicencePersistingEnabled(boolean isEnabled) {
-        this.licencePersistingEnabled = true;
+        this.licencePersistingEnabled = isEnabled;
     }
 
     @Override
