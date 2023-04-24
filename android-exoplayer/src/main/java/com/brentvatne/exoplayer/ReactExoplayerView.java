@@ -1640,7 +1640,7 @@ class ReactExoplayerView extends FrameLayout implements
                                 }
                                 return null;
 
-                            } catch (Exception e) {
+                            } catch (IOException e) {
                                 Log.i("DRM LICENCE CACHING", "Failed to acquire offline license", e);
                             }
 
@@ -1656,9 +1656,6 @@ class ReactExoplayerView extends FrameLayout implements
                             @Override
                             public void onError(Throwable e) {
                                 Log.i("DRM LICENCE CACHING", "Failed to acquire offline license", e);
-                                if (existingLicense != null) {
-                                    LicencesDataStore.removeLicence(assetId);
-                                }
                             }
                         });
             }

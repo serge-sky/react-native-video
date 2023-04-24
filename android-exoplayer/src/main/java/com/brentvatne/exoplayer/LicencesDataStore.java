@@ -50,17 +50,6 @@ public class LicencesDataStore {
         return getLicences().get(assetId);
     }
 
-    public static void removeLicence(String assetId) {
-        Map<String, Map<String, String>> drmLicences = getLicences();
-        drmLicences.remove(assetId);
-
-        store.updateDataAsync(prefsIn -> {
-            MutablePreferences mutablePreferences = prefsIn.toMutablePreferences();
-            mutablePreferences.set(licenceKey, gson.toJson(drmLicences));
-            return Single.just(mutablePreferences);
-        });
-    }
-
     public static void storeLicense(String assetId, String drmLicenseUrl, byte[] licence) {
         if (licence != null) {
             Map<String, String> cachedLicence = new HashMap<>();
