@@ -173,7 +173,7 @@ class ReactExoplayerView extends FrameLayout implements
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
     private String assetId = null;
-    private boolean licencePersistingEnabled = true;
+    private boolean licencePersistingEnabled = false;
     private boolean controls;
     private ReadableMap analyticsMeta;
     // \ End props

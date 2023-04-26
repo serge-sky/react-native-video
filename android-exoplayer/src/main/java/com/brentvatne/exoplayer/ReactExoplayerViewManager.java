@@ -348,7 +348,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setAnalyticsMeta(analyticsMeta);
     }
 
-    @ReactProp(name = PROP_LICENCE_PERSISTENCE_ENABLED, defaultBoolean = true)
+    @ReactProp(name = PROP_LICENCE_PERSISTENCE_ENABLED, defaultBoolean = false)
     public void setPropLicencePersistenceEnabled(final ReactExoplayerView videoView, final boolean isEnabled) {
         videoView.setLicencePersistingEnabled(isEnabled);
     }
