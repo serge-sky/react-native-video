@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.core.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SurfaceView;
 import android.view.TextureView;
@@ -77,20 +78,9 @@ public final class ExoPlayerView extends FrameLayout {
         shutterView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.black));
 
         subtitleLayout = new SubtitleView(context);
-
-        subtitleLayout.setApplyEmbeddedFontSizes(false);
-        subtitleLayout.setApplyEmbeddedStyles(false);
-
-        Typeface subtitleTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/arial.ttf");
-
-        CaptionStyleCompat style = new CaptionStyleCompat(Color.RED, Color.TRANSPARENT, Color.TRANSPARENT,
-                CaptionStyleCompat.EDGE_TYPE_OUTLINE, Color.BLACK, subtitleTypeface);
-
-        subtitleLayout.setStyle(style);
-
         subtitleLayout.setLayoutParams(layoutParams);
-        //subtitleLayout.setUserDefaultStyle();
-        //subtitleLayout.setUserDefaultTextSize();
+        subtitleLayout.setUserDefaultStyle();
+        subtitleLayout.setUserDefaultTextSize();
 
         updateSurfaceView();
 
@@ -114,6 +104,29 @@ public final class ExoPlayerView extends FrameLayout {
         } else if (surfaceView instanceof SurfaceView) {
             player.setVideoSurfaceView((SurfaceView) surfaceView);
         }
+    }
+    public void setSubtitleStyle(SubtitleStyle style) {
+        // ensure we reset subtile style before reapplying it
+        subtitleLayout.setUserDefaultStyle();
+        subtitleLayout.setUserDefaultTextSize();
+
+        if (style.getFontSize() > 0) {
+            subtitleLayout.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, style.getFontSize());
+        }
+        subtitleLayout.setPadding(style.getPaddingLeft(), style.getPaddingTop(), style.getPaddingRight(), style.getPaddingBottom());
+
+        subtitleLayout.setApplyEmbeddedFontSizes(false);
+        subtitleLayout.setApplyEmbeddedStyles(false);
+
+        Typeface subtitleTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/arial.ttf");
+
+        String foregroundColorString = style.getForegroundColor();
+        int foregroundColor = Color.parseColor(foregroundColorString);
+
+        CaptionStyleCompat captionStyleCompat = new CaptionStyleCompat(foregroundColor, Color.TRANSPARENT, Color.TRANSPARENT,
+                CaptionStyleCompat.EDGE_TYPE_OUTLINE, Color.BLACK, subtitleTypeface);
+
+        subtitleLayout.setStyle(captionStyleCompat);
     }
 
     private void updateSurfaceView() {
