@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.graphics.Color;
+import android.graphics.Typeface;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -79,8 +80,11 @@ public final class ExoPlayerView extends FrameLayout {
 
         subtitleLayout.setApplyEmbeddedFontSizes(false);
         subtitleLayout.setApplyEmbeddedStyles(false);
+
+        Typeface subtitleTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/arial.ttf");
+
         CaptionStyleCompat style = new CaptionStyleCompat(Color.RED, Color.TRANSPARENT, Color.TRANSPARENT,
-                CaptionStyleCompat.EDGE_TYPE_OUTLINE, Color.BLACK, null);
+                CaptionStyleCompat.EDGE_TYPE_OUTLINE, Color.BLACK, subtitleTypeface);
 
         subtitleLayout.setStyle(style);
 
