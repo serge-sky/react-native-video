@@ -122,9 +122,17 @@ public final class ExoPlayerView extends FrameLayout {
 
         String foregroundColorString = style.getForegroundColor();
         int foregroundColor = Color.parseColor(foregroundColorString);
+        String backgroundColorString = style.getBackgroundColor();
+        int backgroundColor = Color.parseColor(backgroundColorString);
+        String edgeColorString = style.getEdgeColor();
+        int edgeColor = Color.parseColor(edgeColorString);
+        String windowColorString = style.getWindowColor();
+        int windowColor = Color.parseColor(windowColorString);
+        int edgeType = style.getEdgeType();
+        
 
-        CaptionStyleCompat captionStyleCompat = new CaptionStyleCompat(foregroundColor, Color.TRANSPARENT, Color.TRANSPARENT,
-                CaptionStyleCompat.EDGE_TYPE_OUTLINE, Color.BLACK, subtitleTypeface);
+        CaptionStyleCompat captionStyleCompat = new CaptionStyleCompat(foregroundColor, backgroundColor, windowColor,
+                edgeType, edgeColor, subtitleTypeface);
 
         subtitleLayout.setStyle(captionStyleCompat);
     }
