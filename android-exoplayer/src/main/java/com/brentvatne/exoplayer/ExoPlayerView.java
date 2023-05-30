@@ -5,7 +5,6 @@ import android.content.Context;
 import androidx.core.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SurfaceView;
 import android.view.TextureView;
@@ -101,16 +100,6 @@ public final class ExoPlayerView extends FrameLayout {
         } else if (surfaceView instanceof SurfaceView) {
             player.setVideoSurfaceView((SurfaceView) surfaceView);
         }
-    }
-    public void setSubtitleStyle(SubtitleStyle style) {
-        // ensure we reset subtile style before reapplying it
-        subtitleLayout.setUserDefaultStyle();
-        subtitleLayout.setUserDefaultTextSize();
-
-        if (style.getFontSize() > 0) {
-            subtitleLayout.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, style.getFontSize());
-        }
-        subtitleLayout.setPadding(style.getPaddingLeft(), style.getPaddingTop(), style.getPaddingRight(), style.getPaddingBottom());
     }
 
     private void updateSurfaceView() {
