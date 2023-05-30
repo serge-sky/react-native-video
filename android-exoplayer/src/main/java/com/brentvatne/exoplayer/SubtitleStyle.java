@@ -19,6 +19,7 @@ public class SubtitleStyle {
     private static final String PROP_WINDOW_COLOR = "windowColor";
     private static final String PROP_EDGE_TYPE = "edgeType";
     private static final String PROP_EDGE_COLOR = "edgeColor";
+    private static final String PROP_FONT_FAMILY_PATH = "fontFamilyPath";
 
 
     private int fontSize = -1;
@@ -32,6 +33,7 @@ public class SubtitleStyle {
     private String windowColor = "#00000000";
     private int edgeType = CaptionStyleCompat.EDGE_TYPE_NONE;
     private String edgeColor = "#00000000";
+    private String fontFamilyPath = null;
 
     private SubtitleStyle() {}
 
@@ -45,6 +47,7 @@ public class SubtitleStyle {
     String getWindowColor() {return windowColor;}
     int getEdgeType() {return edgeType;}
     String getEdgeColor() {return edgeColor;}
+    String getFontFamilyPath() {return fontFamilyPath;}
 
     public static SubtitleStyle parse(ReadableMap src) {
         SubtitleStyle subtitleStyle = new SubtitleStyle();
@@ -58,6 +61,7 @@ public class SubtitleStyle {
         subtitleStyle.windowColor = ReactBridgeUtils.safeGetString(src, PROP_WINDOW_COLOR, "#00000000");
         subtitleStyle.edgeType = convertStringToEdgeType(ReactBridgeUtils.safeGetString(src, PROP_EDGE_TYPE, "none"));
         subtitleStyle.edgeColor = ReactBridgeUtils.safeGetString(src, PROP_EDGE_COLOR, "#00000000");
+        subtitleStyle.fontFamilyPath = ReactBridgeUtils.safeGetString(src, PROP_FONT_FAMILY_PATH, null);
         return subtitleStyle;
     }
 

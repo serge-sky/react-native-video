@@ -118,7 +118,6 @@ public final class ExoPlayerView extends FrameLayout {
         subtitleLayout.setApplyEmbeddedFontSizes(false);
         subtitleLayout.setApplyEmbeddedStyles(false);
 
-        Typeface subtitleTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/arial.ttf");
 
         String foregroundColorString = style.getForegroundColor();
         int foregroundColor = Color.parseColor(foregroundColorString);
@@ -129,7 +128,13 @@ public final class ExoPlayerView extends FrameLayout {
         String windowColorString = style.getWindowColor();
         int windowColor = Color.parseColor(windowColorString);
         int edgeType = style.getEdgeType();
+        String fontFamilyPath = style.getFontFamilyPath();
         
+        Typeface subtitleTypeface = null;
+        
+        if (fontFamilyPath != null && !fontFamilyPath.isEmpty()) {
+            subtitleTypeface = Typeface.createFromAsset(context.getAssets(), fontFamilyPath);
+        }
 
         CaptionStyleCompat captionStyleCompat = new CaptionStyleCompat(foregroundColor, backgroundColor, windowColor,
                 edgeType, edgeColor, subtitleTypeface);
