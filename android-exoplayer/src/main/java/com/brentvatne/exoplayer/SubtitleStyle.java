@@ -29,9 +29,9 @@ public class SubtitleStyle {
 
     private String foregroundColor = "#FFFFFF";
     private String backgroundColor = "#000000";
-    private String windowColor = "#transparent";
+    private String windowColor = "#00000000";
     private int edgeType = CaptionStyleCompat.EDGE_TYPE_NONE;
-    private String edgeColor = "#transparent";
+    private String edgeColor = "#00000000";
 
     private SubtitleStyle() {}
 
@@ -55,9 +55,9 @@ public class SubtitleStyle {
         subtitleStyle.paddingRight = ReactBridgeUtils.safeGetInt(src, PROP_PADDING_RIGHT, 0);
         subtitleStyle.foregroundColor = ReactBridgeUtils.safeGetString(src, PROP_FOREGROUND_COLOR, "#FFFFFF");
         subtitleStyle.backgroundColor = ReactBridgeUtils.safeGetString(src, PROP_BACKGROUND_COLOR, "#000000");
-        subtitleStyle.windowColor = ReactBridgeUtils.safeGetString(src, PROP_WINDOW_COLOR, "transparent");
+        subtitleStyle.windowColor = ReactBridgeUtils.safeGetString(src, PROP_WINDOW_COLOR, "#00000000");
         subtitleStyle.edgeType = convertStringToEdgeType(ReactBridgeUtils.safeGetString(src, PROP_EDGE_TYPE, "none"));
-        subtitleStyle.edgeColor = ReactBridgeUtils.safeGetString(src, PROP_EDGE_COLOR, "transparent");
+        subtitleStyle.edgeColor = ReactBridgeUtils.safeGetString(src, PROP_EDGE_COLOR, "#00000000");
         return subtitleStyle;
     }
 
