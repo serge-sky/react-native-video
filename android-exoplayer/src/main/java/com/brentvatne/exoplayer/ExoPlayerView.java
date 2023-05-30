@@ -77,15 +77,16 @@ public final class ExoPlayerView extends FrameLayout {
 
         subtitleLayout = new SubtitleView(context);
 
-
+        subtitleLayout.setApplyEmbeddedFontSizes(false)
+        subtitleLayout.setApplyEmbeddedStyles(false)
         CaptionStyleCompat style = new CaptionStyleCompat(Color.RED, Color.TRANSPARENT, Color.TRANSPARENT,
                 CaptionStyleCompat.EDGE_TYPE_OUTLINE, Color.BLACK, null);
 
         subtitleLayout.setStyle(style);
 
         subtitleLayout.setLayoutParams(layoutParams);
-        subtitleLayout.setUserDefaultStyle();
-        subtitleLayout.setUserDefaultTextSize();
+        //subtitleLayout.setUserDefaultStyle();
+        //subtitleLayout.setUserDefaultTextSize();
 
         updateSurfaceView();
 
