@@ -74,6 +74,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_ANALYTICS_META = "analyticsMeta";
     private static final String PROP_LICENCE_PERSISTENCE_ENABLED = "licencePersistenceEnabled";
 
+    private static final String PROP_SUBTITLE_STYLE = "subtitleStyle";
+
     private ReactExoplayerConfig config;
 
     public ReactExoplayerViewManager(ReactExoplayerConfig config) {
@@ -322,6 +324,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_CONTROLS, defaultBoolean = false)
     public void setControls(final ReactExoplayerView videoView, final boolean controls) {
         videoView.setControls(controls);
+    }
+
+    @ReactProp(name = PROP_SUBTITLE_STYLE)
+    public void setSubtitleStyle(final ReactExoplayerView videoView, @Nullable final ReadableMap src) {
+        videoView.setSubtitleStyle(SubtitleStyle.parse(src));
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)
