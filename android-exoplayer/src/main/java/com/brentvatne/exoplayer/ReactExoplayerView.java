@@ -1664,7 +1664,4 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
     }
-    public void setSubtitleStyle(SubtitleStyle style) {
-        exoPlayerView.setSubtitleStyle(style);
-    }
 }

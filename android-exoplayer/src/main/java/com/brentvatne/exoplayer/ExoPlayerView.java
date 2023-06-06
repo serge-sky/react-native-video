@@ -5,15 +5,12 @@ import android.content.Context;
 import androidx.core.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.graphics.Color;
-import android.graphics.Typeface;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -28,7 +25,6 @@ import com.google.android.exoplayer2.text.TextRenderer;
 import com.google.android.exoplayer2.text.TextOutput;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
-import com.google.android.exoplayer2.text.CaptionStyleCompat;
 
 import java.util.List;
 
@@ -104,42 +100,6 @@ public final class ExoPlayerView extends FrameLayout {
         } else if (surfaceView instanceof SurfaceView) {
             player.setVideoSurfaceView((SurfaceView) surfaceView);
         }
-    }
-    public void setSubtitleStyle(SubtitleStyle style) {
-        // ensure we reset subtile style before reapplying it
-        subtitleLayout.setUserDefaultStyle();
-        subtitleLayout.setUserDefaultTextSize();
-
-        if (style.getFontSize() > 0) {
-            subtitleLayout.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, style.getFontSize());
-        }
-        subtitleLayout.setPadding(style.getPaddingLeft(), style.getPaddingTop(), style.getPaddingRight(), style.getPaddingBottom());
-
-        subtitleLayout.setApplyEmbeddedFontSizes(false);
-        subtitleLayout.setApplyEmbeddedStyles(false);
-
-
-        String foregroundColorString = style.getForegroundColor();
-        int foregroundColor = Color.parseColor(foregroundColorString);
-        String backgroundColorString = style.getBackgroundColor();
-        int backgroundColor = Color.parseColor(backgroundColorString);
-        String edgeColorString = style.getEdgeColor();
-        int edgeColor = Color.parseColor(edgeColorString);
-        String windowColorString = style.getWindowColor();
-        int windowColor = Color.parseColor(windowColorString);
-        int edgeType = style.getEdgeType();
-        String fontFamilyPath = style.getFontFamilyPath();
-        
-        Typeface subtitleTypeface = null;
-        
-        if (fontFamilyPath != null && !fontFamilyPath.isEmpty()) {
-            subtitleTypeface = Typeface.createFromAsset(context.getAssets(), fontFamilyPath);
-        }
-
-        CaptionStyleCompat captionStyleCompat = new CaptionStyleCompat(foregroundColor, backgroundColor, windowColor,
-                edgeType, edgeColor, subtitleTypeface);
-
-        subtitleLayout.setStyle(captionStyleCompat);
     }
 
     private void updateSurfaceView() {
