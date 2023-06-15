@@ -677,8 +677,9 @@ class ReactExoplayerView extends FrameLayout implements
                         keyRequestPropertiesArray[i + 1]);
             }
         }
+        Log.w("spike", "licencePersistingEnabled:" + licencePersistingEnabled);
         DefaultDrmSessionManager drmSessionManager = new DefaultDrmSessionManager(uuid, mediaDrm, drmCallback,
-                null, false, 3);
+                null, true, 3);
 
         if (licencePersistingEnabled) {
             byte[] key = LicencesDataStore.getLicence(this.assetId);
