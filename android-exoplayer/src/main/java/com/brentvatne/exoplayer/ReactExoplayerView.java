@@ -1067,6 +1067,7 @@ class ReactExoplayerView extends FrameLayout implements
             WritableMap textTrack = Arguments.createMap();
             textTrack.putInt("index", i);
             textTrack.putString("title", format.id != null ? format.id : "");
+            textTrack.putString("label", format.label != null ? format.label : "");
             textTrack.putString("type", format.sampleMimeType);
             textTrack.putString("language", format.language != null ? format.language : "");
             textTracks.pushMap(textTrack);
