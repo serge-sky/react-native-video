@@ -102,10 +102,11 @@ import com.brentvatne.common.VideoTrack;
 import androidx.annotation.WorkerThread;
 
 import com.google.android.exoplayer2.trackselection.TrackSelection;
-import java.util.concurrent.ExecutorService;
 import com.google.android.exoplayer2.mediacodec.MediaCodecInfo;
 
 import java.util.concurrent.Future;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Callable;
 import com.google.android.exoplayer2.source.dash.manifest.Period;
 import com.google.android.exoplayer2.source.dash.manifest.AdaptationSet;
