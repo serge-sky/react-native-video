@@ -30,7 +30,44 @@ class VideoPlayer extends Component {
 
   onLoad = (data) => {
     this.setState({ duration: data.duration });
+    this.onAudioTracks(data)
+    this.onTextTracks(data)
   };
+
+  onAudioTracks = (data: any) => {
+    const selectedTrack = data.audioTracks?.find((x: any) => {
+      return x.selected
+    })
+    this.setState({
+      audioTracks: data.audioTracks,
+    })
+    if (selectedTrack?.language) {
+      this.setState({
+        selectedAudioTrack: {
+          type: 'language',
+          value: selectedTrack?.language,
+        },
+      })
+    }
+  }
+  onTextTracks = (data: any) => {
+    const selectedTrack = data.textTracks?.find((x: any) => {
+      return x.selected
+    })
+
+    this.setState({
+      textTracks: data.textTracks,
+    })
+    if (selectedTrack?.language) {
+      this.setState({
+        textTracks: data,
+        selectedTextTrack: {
+          type: 'language',
+          value: selectedTrack?.language,
+        },
+      })
+    }
+  }
 
   onProgress = (data) => {
     this.setState({ currentTime: data.currentTime });
@@ -114,6 +151,8 @@ class VideoPlayer extends Component {
             muted={this.state.muted}
             resizeMode={this.state.resizeMode}
             onLoad={this.onLoad}
+            onAudioTracks={this.onAudioTracks}
+            onTextTracks={this.onTextTracks}
             onProgress={this.onProgress}
             onEnd={this.onEnd}
             onAudioBecomingNoisy={this.onAudioBecomingNoisy}
