@@ -101,6 +101,17 @@ import com.brentvatne.common.Track;
 import com.brentvatne.common.VideoTrack;
 import androidx.annotation.WorkerThread;
 
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import java.util.concurrent.ExecutorService;
+import com.google.android.exoplayer2.mediacodec.MediaCodecInfo;
+
+import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
+import com.google.android.exoplayer2.source.dash.manifest.Period;
+import com.google.android.exoplayer2.source.dash.manifest.AdaptationSet;
+import com.google.android.exoplayer2.source.dash.manifest.Representation;
+import java.util.concurrent.TimeUnit;
+
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
         LifecycleEventListener,
@@ -181,6 +192,8 @@ class ReactExoplayerView extends FrameLayout implements
     private boolean licencePersistingEnabled = false;
     private boolean controls;
     private ReadableMap analyticsMeta;
+    private long contentStartTime = -1L;
+
     // \ End props
 
     // React
@@ -996,7 +1009,7 @@ class ReactExoplayerView extends FrameLayout implements
             setSelectedAudioTrack(audioTrackType, audioTrackValue);
             setSelectedVideoTrack(videoTrackType, videoTrackValue);
             setSelectedTextTrack(textTrackType, textTrackValue);
-            
+
             Format videoFormat = player.getVideoFormat();
             int width = videoFormat != null ? videoFormat.width : 0;
             int height = videoFormat != null ? videoFormat.height : 0;
@@ -1011,9 +1024,6 @@ class ReactExoplayerView extends FrameLayout implements
                     public void run() {
                         // To prevent ANRs caused by getVideoTrackInfo we run this on a different thread and notify the player only when we're done
                         ArrayList<VideoTrack> videoTracks = getVideoTrackInfoFromManifest();
-                        if (videoTracks != null) {
-                            isUsingContentResolution = true;
-                        }
                         eventEmitter.load(player.getDuration(), player.getCurrentPosition(), width, height,
                                 audioTracks, textTracks, videoTracks, trackId );
 
@@ -1065,15 +1075,13 @@ class ReactExoplayerView extends FrameLayout implements
             // Likely player is unmounting so no audio tracks are available anymore
             return videoTracks;
         }
-        WritableArray videoTracks = Arguments.createArray();
-
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
         int index = getTrackRendererIndex(C.TRACK_TYPE_VIDEO);
         if (info == null || index == C.INDEX_UNSET) {
             return videoTracks;
         }
 
-       TrackGroupArray groups = info.getTrackGroups(index);
+        TrackGroupArray groups = info.getTrackGroups(index);
         for (int i = 0; i < groups.length; ++i) {
             TrackGroup group = groups.get(i);
 
@@ -1635,6 +1643,10 @@ class ReactExoplayerView extends FrameLayout implements
         this.disableFocus = disableFocus;
     }
 
+    public void setContentStartTime(int contentStartTime) {
+        this.contentStartTime = (long)contentStartTime;
+    }
+
     public void setFullscreen(boolean fullscreen) {
         if (fullscreen == isFullscreen) {
             return; // Avoid generating events when nothing is changing
@@ -1807,5 +1819,24 @@ class ReactExoplayerView extends FrameLayout implements
     }
     public void setSubtitleStyle(SubtitleStyle style) {
         exoPlayerView.setSubtitleStyle(style);
+    }
+
+    private boolean isFormatSupported(Format format) {
+        int width = format.width == Format.NO_VALUE ? 0 : format.width;
+        int height = format.height == Format.NO_VALUE ? 0 : format.height;
+        float frameRate = format.frameRate == Format.NO_VALUE ? 0 : format.frameRate;
+        String mimeType = format.sampleMimeType;
+        if (mimeType == null) {
+            return true;
+        }
+        boolean isSupported = false;
+        try {
+            MediaCodecInfo codecInfo = MediaCodecUtil.getDecoderInfo(mimeType, false, false);
+            isSupported = codecInfo.isVideoSizeAndRateSupportedV21(width, height, frameRate);
+        } catch (Exception e) {
+            // Failed to get decoder info - assume it is supported
+            isSupported = true;
+        }
+        return isSupported;
     }
 }
