@@ -109,6 +109,12 @@ export default class Video extends Component {
     }
   };
 
+  _onTextTracks = (event) => {
+    if (this.props.onTextTracks) {
+      this.props.onTextTracks(event.nativeEvent);
+    }
+  };
+
   _onError = (event) => {
     if (this.props.onError) {
       this.props.onError(event.nativeEvent);
@@ -307,6 +313,7 @@ export default class Video extends Component {
       },
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
+      onTextTracks: this._onTextTracks,
       onVideoError: this._onError,
       onVideoProgress: this._onProgress,
       onVideoSeek: this._onSeek,
@@ -494,6 +501,7 @@ Video.propTypes = {
   hideShutterView: PropTypes.bool,
   onLoadStart: PropTypes.func,
   onLoad: PropTypes.func,
+  onTextTracks: PropTypes.func,
   onBuffer: PropTypes.func,
   onError: PropTypes.func,
   onProgress: PropTypes.func,
