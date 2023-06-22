@@ -174,11 +174,8 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD, event);
     }
 
-    void textTracks(ArrayList<Track> textTracks){
-        WritableMap event = Arguments.createMap();
-        event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks);
-
-        receiveEvent(EVENT_TEXT_TRACKS, arrayToObject(EVENT_PROP_TEXT_TRACKS, event));
+    void textTracks(WritableArray textTracks){
+        receiveEvent(EVENT_TEXT_TRACKS, textTracks);
     }
 
     void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPlaybackTime) {
