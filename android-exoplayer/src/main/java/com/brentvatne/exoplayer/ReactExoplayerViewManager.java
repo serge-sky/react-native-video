@@ -73,7 +73,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_ANALYTICS_META = "analyticsMeta";
     private static final String PROP_LICENCE_PERSISTENCE_ENABLED = "licencePersistenceEnabled";
-
+    private static final String PROP_LICENCE_MULTI_SESSION_ENABLED = "licenceMultiSessionEnabled";
     private static final String PROP_SUBTITLE_STYLE = "subtitleStyle";
 
     private ReactExoplayerConfig config;
@@ -358,6 +358,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_LICENCE_PERSISTENCE_ENABLED, defaultBoolean = false)
     public void setPropLicencePersistenceEnabled(final ReactExoplayerView videoView, final boolean isEnabled) {
         videoView.setLicencePersistingEnabled(isEnabled);
+    }
+
+    @ReactProp(name = PROP_LICENCE_MULTI_SESSION_ENABLED, defaultBoolean = false)
+    public void setPropLicenceMultiSessionEnabled(final ReactExoplayerView videoView, final boolean isEnabled) {
+        videoView.setLicenceMultiSessionEnabled(isEnabled);
     }
 
     private boolean startsWithValidScheme(String uriString) {

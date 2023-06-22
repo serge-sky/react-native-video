@@ -174,6 +174,7 @@ class ReactExoplayerView extends FrameLayout implements
     private String[] drmLicenseHeader = null;
     private String assetId = null;
     private boolean licencePersistingEnabled = false;
+    private boolean licenceMultiSessionEnabled = false;
     private boolean controls;
     private ReadableMap analyticsMeta;
     // \ End props
@@ -678,7 +679,7 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
         DefaultDrmSessionManager drmSessionManager = new DefaultDrmSessionManager(uuid, mediaDrm, drmCallback,
-                null, false, 3);
+                null, this.licenceMultiSessionEnabled, 3);
 
         if (licencePersistingEnabled) {
             byte[] key = LicencesDataStore.getLicence(this.assetId);
@@ -1577,6 +1578,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setLicencePersistingEnabled(boolean isEnabled) {
         this.licencePersistingEnabled = isEnabled;
+    }
+
+    public void setLicenceMultiSessionEnabled(boolean isEnabled) {
+        this.licenceMultiSessionEnabled = isEnabled;
     }
 
     @Override
