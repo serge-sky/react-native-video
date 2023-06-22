@@ -1128,7 +1128,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-        // Do Nothing.
+        eventEmitter.textTracks(getTextTrackInfo());
     }
 
     @Override

@@ -47,6 +47,7 @@ class VideoEventEmitter {
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
     private static final String EVENT_AUDIO_FOCUS_CHANGE = "onAudioFocusChanged";
     private static final String EVENT_PLAYBACK_RATE_CHANGE = "onPlaybackRateChange";
+    private static final String EVENT_TEXT_TRACKS = "onTextTracks";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -68,6 +69,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
+            EVENT_TEXT_TRACKS,
             EVENT_BANDWIDTH,
     };
 
@@ -92,6 +94,7 @@ class VideoEventEmitter {
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
             EVENT_PLAYBACK_RATE_CHANGE,
+            EVENT_TEXT_TRACKS,
             EVENT_BANDWIDTH,
     })
     @interface VideoEvents {
@@ -169,6 +172,13 @@ class VideoEventEmitter {
         event.putBoolean(EVENT_PROP_STEP_FORWARD, true);
 
         receiveEvent(EVENT_LOAD, event);
+    }
+
+    void textTracks(WritableArray textTracks){
+        WritableMap event = Arguments.createMap();
+        event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks);
+
+        receiveEvent(EVENT_TEXT_TRACKS, event);
     }
 
     void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPlaybackTime) {
