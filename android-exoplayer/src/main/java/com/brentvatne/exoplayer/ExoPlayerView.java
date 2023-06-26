@@ -267,7 +267,7 @@ public final class ExoPlayerView extends FrameLayout {
             // The design of figma screen is 1080x1920
             int screenHeight = 1080;
             // Calculate what proportion of the screen height this distance is
-            float pixelRatio = 36 / (float) screenHeight;
+            float pixelRatio = 72 / (float) screenHeight;
             List<Cue> updatedCues = new ArrayList<>();
             for(Cue cue: cues) {
                 // Create a new Cue object, with the vertical position of the subtitles set to 1 minus the calculated ratio
