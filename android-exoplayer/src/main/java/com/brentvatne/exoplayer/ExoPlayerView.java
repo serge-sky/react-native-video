@@ -3,6 +3,7 @@ package com.brentvatne.exoplayer;
 import android.annotation.TargetApi;
 import android.content.Context;
 import androidx.core.content.ContextCompat;
+
 import android.text.Layout;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -263,12 +264,16 @@ public final class ExoPlayerView extends FrameLayout {
 
         @Override
         public void onCues(List<Cue> cues) {
-            List<Cue> newCues = new ArrayList<>();
+            // The design of figma screen is 1080x1920
+            int screenHeight = 1080;
+            // Calculate what proportion of the screen height this distance is
+            float pixelRatio = 36 / (float) screenHeight;
+            List<Cue> updatedCues = new ArrayList<>();
             for(Cue cue: cues) {
-                Cue newCue = new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, Cue.DIMEN_UNSET,  Cue.TYPE_UNSET,  Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET,  cues.get(0).size);
-                newCues.add(newCue);
+                // Create a new Cue object, with the vertical position of the subtitles set to 1 minus the calculated ratio
+                updatedCues.add(new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, 1 - pixelRatio, Cue.LINE_TYPE_FRACTION,  Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET,  cue.size));
             }
-            subtitleLayout.onCues(newCues);
+            subtitleLayout.onCues(updatedCues);
         }
 
         // SimpleExoPlayer.VideoListener implementation
