@@ -2,6 +2,7 @@ package com.brentvatne.exoplayer;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+
 import androidx.core.content.ContextCompat;
 
 import android.text.Layout;
@@ -108,6 +109,7 @@ public final class ExoPlayerView extends FrameLayout {
             player.setVideoSurfaceView((SurfaceView) surfaceView);
         }
     }
+
     public void setSubtitleStyle(SubtitleStyle style) {
         // ensure we reset subtile style before reapplying it
         subtitleLayout.setUserDefaultStyle();
@@ -132,9 +134,9 @@ public final class ExoPlayerView extends FrameLayout {
         int windowColor = Color.parseColor(windowColorString);
         int edgeType = style.getEdgeType();
         String fontFamilyPath = style.getFontFamilyPath();
-        
+
         Typeface subtitleTypeface = null;
-        
+
         if (fontFamilyPath != null && !fontFamilyPath.isEmpty()) {
             subtitleTypeface = Typeface.createFromAsset(context.getAssets(), fontFamilyPath);
         }
@@ -264,16 +266,15 @@ public final class ExoPlayerView extends FrameLayout {
 
         @Override
         public void onCues(List<Cue> cues) {
-             // The design of figma screen is 1080x1920
+            // figma design baseline is 1080p
             int screenHeight = 1080;
-            // The distance from the bottom of the screen
-            int distanceFromBottom = 72;
-            // Calculate what proportion of the screen height this distance is
-            float pixelRatio = distanceFromBottom / (float) screenHeight;
+            int lineHeightPixels = 42;
+            float pixelRatio = 77 / (float) screenHeight;
             List<Cue> updatedCues = new ArrayList<>();
-            for(Cue cue: cues) {
-                // Create a new Cue object, with the vertical position of the subtitles set to 1 minus the calculated ratio
-                updatedCues.add(new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, 1 - pixelRatio, Cue.LINE_TYPE_FRACTION,  Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET,  cue.size));
+            for (Cue cue : cues) {
+                int numberOfLines = cue.text.toString().split("\n").length;
+                float offset = lineHeightPixels * (numberOfLines - 1) / (float) screenHeight;
+                updatedCues.add(new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, 1 - pixelRatio - offset, Cue.LINE_TYPE_FRACTION, Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET, cue.size));
             }
             subtitleLayout.onCues(updatedCues);
         }
