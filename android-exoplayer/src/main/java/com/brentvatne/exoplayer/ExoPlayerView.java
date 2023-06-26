@@ -2,7 +2,10 @@ package com.brentvatne.exoplayer;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+
 import androidx.core.content.ContextCompat;
+
+import android.text.Layout;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -30,6 +33,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
 import com.google.android.exoplayer2.text.CaptionStyleCompat;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @TargetApi(16)
@@ -105,6 +109,7 @@ public final class ExoPlayerView extends FrameLayout {
             player.setVideoSurfaceView((SurfaceView) surfaceView);
         }
     }
+
     public void setSubtitleStyle(SubtitleStyle style) {
         // ensure we reset subtile style before reapplying it
         subtitleLayout.setUserDefaultStyle();
@@ -129,9 +134,9 @@ public final class ExoPlayerView extends FrameLayout {
         int windowColor = Color.parseColor(windowColorString);
         int edgeType = style.getEdgeType();
         String fontFamilyPath = style.getFontFamilyPath();
-        
+
         Typeface subtitleTypeface = null;
-        
+
         if (fontFamilyPath != null && !fontFamilyPath.isEmpty()) {
             subtitleTypeface = Typeface.createFromAsset(context.getAssets(), fontFamilyPath);
         }
@@ -261,7 +266,20 @@ public final class ExoPlayerView extends FrameLayout {
 
         @Override
         public void onCues(List<Cue> cues) {
-            subtitleLayout.onCues(cues);
+            // figma design baseline is 1080p
+            int screenHeight = 1080;
+            int lineHeightPixels = 42;
+            float pixelRatio = 77 / (float) screenHeight;
+            List<Cue> updatedCues = new ArrayList<>();
+            for (Cue cue : cues) {
+                float offset = 0;
+                if (cue.text != null) {
+                    int numberOfLines = cue.text.toString().split("\n").length;
+                    offset = lineHeightPixels * (numberOfLines - 1) / (float) screenHeight;
+                }
+                updatedCues.add(new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, 1 - pixelRatio - offset, Cue.LINE_TYPE_FRACTION, Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET, cue.size));
+            }
+            subtitleLayout.onCues(updatedCues);
         }
 
         // SimpleExoPlayer.VideoListener implementation
