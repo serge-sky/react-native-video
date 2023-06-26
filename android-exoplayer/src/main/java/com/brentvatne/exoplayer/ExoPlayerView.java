@@ -3,6 +3,7 @@ package com.brentvatne.exoplayer;
 import android.annotation.TargetApi;
 import android.content.Context;
 import androidx.core.content.ContextCompat;
+import android.text.Layout;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -30,6 +31,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
 import com.google.android.exoplayer2.text.CaptionStyleCompat;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @TargetApi(16)
@@ -261,7 +263,12 @@ public final class ExoPlayerView extends FrameLayout {
 
         @Override
         public void onCues(List<Cue> cues) {
-            subtitleLayout.onCues(cues);
+            List<Cue> newCues = new ArrayList<>();
+            for(Cue cue: cues) {
+                Cue newCue = new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, Cue.DIMEN_UNSET,  Cue.TYPE_UNSET,  Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET,  cues.get(0).size);
+                newCues.add(newCue);
+            }
+            subtitleLayout.onCues(newCues);
         }
 
         // SimpleExoPlayer.VideoListener implementation
