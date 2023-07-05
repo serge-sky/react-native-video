@@ -48,7 +48,7 @@ public final class ExoPlayerView extends FrameLayout {
     private Context context;
     private ViewGroup.LayoutParams layoutParams;
 
-    private boolean useTextureView = false;
+    private boolean useTextureView = true;
     private boolean hideShutterView = false;
 
     public ExoPlayerView(Context context) {
