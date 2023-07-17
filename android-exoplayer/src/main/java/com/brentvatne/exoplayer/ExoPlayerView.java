@@ -268,9 +268,6 @@ public final class ExoPlayerView extends FrameLayout {
         public void onCues(List<Cue> cues) {
             List<Cue> updatedCues = new ArrayList<>();
             for (Cue cue : cues) {
-                if (cue.text != null) {
-                    int numberOfLines = cue.text.toString().split("\n").length;
-                }
                 updatedCues.add(new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, Cue.TYPE_UNSET, Cue.LINE_TYPE_FRACTION, Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET, cue.size));
             }
             subtitleLayout.onCues(updatedCues);
