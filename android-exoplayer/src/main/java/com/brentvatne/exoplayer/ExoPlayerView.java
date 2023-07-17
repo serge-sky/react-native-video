@@ -266,18 +266,9 @@ public final class ExoPlayerView extends FrameLayout {
 
         @Override
         public void onCues(List<Cue> cues) {
-            // figma design baseline is 1080p
-            int screenHeight = 1080;
-            int lineHeightPixels = 42;
-            float pixelRatio = 77 / (float) screenHeight;
             List<Cue> updatedCues = new ArrayList<>();
             for (Cue cue : cues) {
-                float offset = 0;
-                if (cue.text != null) {
-                    int numberOfLines = cue.text.toString().split("\n").length;
-                    offset = lineHeightPixels * (numberOfLines - 1) / (float) screenHeight;
-                }
-                updatedCues.add(new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, 1 - pixelRatio - offset, Cue.LINE_TYPE_FRACTION, Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET, cue.size));
+                updatedCues.add(new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, Cue.TYPE_UNSET, Cue.LINE_TYPE_FRACTION, Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET, cue.size));
             }
             subtitleLayout.onCues(updatedCues);
         }
