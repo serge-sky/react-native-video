@@ -269,7 +269,7 @@ public final class ExoPlayerView extends FrameLayout {
             // figma design baseline is 1080p
             int screenHeight = 1080;
             int lineHeightPixels = 42;
-            float pixelRatio = 77 / (float) screenHeight;
+            float pixelRatio = 60 / (float) screenHeight;
             List<Cue> updatedCues = new ArrayList<>();
             for (Cue cue : cues) {
                 float offset = 0;
