@@ -82,7 +82,6 @@ import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter;
 import com.npaw.youbora.lib6.plugin.Options;
 import com.npaw.youbora.lib6.plugin.Plugin;
 
-
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -91,7 +90,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.lang.ref.Reference.WeakReference;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -777,7 +775,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
        private static class OnAudioFocusChangedListener implements AudioManager.OnAudioFocusChangeListener {
-            private final WeakReference<ReactExoplayerView> view;
+            private final ReactExoplayerView view;
 
             private OnAudioFocusChangedListener(ReactExoplayerView view) {
                 this.view = view;
