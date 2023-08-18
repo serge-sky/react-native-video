@@ -1217,8 +1217,14 @@ class ReactExoplayerView extends FrameLayout implements
     // ReactExoplayerViewManager public api
 
     public void setSrc(final Uri uri, final String extension, Map<String, String> headers) {
+
         if (uri != null) {
             boolean isSourceEqual = uri.equals(srcUri);
+
+            if (srcUri == null) {
+                exoPlayerView.updateSurfaceView();
+                player.play();
+            }
 
             this.srcUri = uri;
             this.extension = extension;
@@ -1240,6 +1246,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void clearSrc() {
         if (srcUri != null) {
+            exoPlayerView.clearVideoView();
             player.stop(true);
             this.srcUri = null;
             this.extension = null;
