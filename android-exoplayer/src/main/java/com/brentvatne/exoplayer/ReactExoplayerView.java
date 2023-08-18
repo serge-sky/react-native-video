@@ -1221,7 +1221,7 @@ class ReactExoplayerView extends FrameLayout implements
         if (uri != null) {
             boolean isSourceEqual = uri.equals(srcUri);
 
-            if (srcUri == null) {
+            if (srcUri == null && player != null) {
                 exoPlayerView.updateSurfaceView();
                 player.play();
             }
