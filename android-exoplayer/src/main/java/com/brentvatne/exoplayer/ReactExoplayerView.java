@@ -158,6 +158,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Uri srcUri;
     private long startTimeMs = -1;
     private long endTimeMs = -1;
+    private long defaultCurrentTimeMs = -1;
     private String extension;
     private boolean repeat;
     private String audioTrackType;
@@ -612,15 +613,22 @@ class ReactExoplayerView extends FrameLayout implements
                         mediaSource = new MergingMediaSource(textSourceArray);
                     }
 
-                    boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+//                    boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+//                    if (haveResumePosition) {
+//                        player.seekTo(resumeWindow, resumePosition);
+//                    }
+
+                    boolean haveResumePosition = defaultCurrentTimeMs > 0;
                     if (haveResumePosition) {
-                        player.seekTo(resumeWindow, resumePosition);
+                        player.seekTo(defaultCurrentTimeMs);
                     }
+
                     player.prepare(mediaSource, !haveResumePosition, false);
                     playerNeedsSource = false;
 
                     reLayout(exoPlayerView);
                     eventEmitter.loadStart();
+
                     loadVideoStarted = true;
                 }
 
@@ -1244,20 +1252,21 @@ class ReactExoplayerView extends FrameLayout implements
 
             if (srcUri == null && player != null) {
                 exoPlayerView.updateSurfaceView();
-                if (defaultCurrentTimeMs > 0) {
-                    seekTo(defaultCurrentTimeMs);
-                }
                 player.play();
             }
+
+
 
             this.srcUri = uri;
             this.startTimeMs = startTimeMs;
             this.endTimeMs = endTimeMs;
+            this.defaultCurrentTimeMs = defaultCurrentTimeMs;
             this.extension = extension;
             this.requestHeaders = headers;
             this.mediaDataSourceFactory =
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             this.requestHeaders);
+
             if (!isSourceEqual) {
                 analyticsMeta = null;
                 if (youboraPlugin != null) {
