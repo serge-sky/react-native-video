@@ -1237,13 +1237,14 @@ class ReactExoplayerView extends FrameLayout implements
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(final Uri uri, final long startTimeMs, final long endTimeMs, final String extension, Map<String, String> headers) {
+    public void setSrc(final Uri uri, final long startTimeMs, final long endTimeMs, final String extension, Map<String, String> headers, final long defaultCurrentTimeMs) {
 
         if (uri != null) {
             boolean isSourceEqual = uri.equals(srcUri) && startTimeMs == this.startTimeMs && endTimeMs == this.endTimeMs;
 
             if (srcUri == null && player != null) {
                 exoPlayerView.updateSurfaceView();
+                seekTo(defaultCurrentTimeMs);
                 player.play();
             }
 
