@@ -1,5 +1,11 @@
 package com.brentvatne.exoplayer;
 
+import static com.google.android.exoplayer2.C.CONTENT_TYPE_DASH;
+import static com.google.android.exoplayer2.C.CONTENT_TYPE_HLS;
+import static com.google.android.exoplayer2.C.CONTENT_TYPE_OTHER;
+import static com.google.android.exoplayer2.C.CONTENT_TYPE_SS;
+import static com.google.android.exoplayer2.C.TIME_END_OF_SOURCE;
+
 import static com.google.android.exoplayer2.drm.DefaultDrmSessionManager.MODE_PLAYBACK;
 
 import android.annotation.SuppressLint;
@@ -153,6 +159,8 @@ class ReactExoplayerView extends FrameLayout implements
 
     // Props from React
     private Uri srcUri;
+    private long startTimeMs = -1;
+    private long endTimeMs = -1;
     private String extension;
     private boolean repeat;
     private String audioTrackType;
@@ -595,7 +603,7 @@ class ReactExoplayerView extends FrameLayout implements
                     // End DRM
 
                     ArrayList<MediaSource> mediaSourceList = buildTextSources();
-                    MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager);
+                    MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager, startTimeMs, endTimeMs);
                     MediaSource mediaSource;
                     if (mediaSourceList.size() == 0) {
                         mediaSource = videoSource;
@@ -691,43 +699,85 @@ class ReactExoplayerView extends FrameLayout implements
         return drmSessionManager;
     }
 
-    private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager) {
-        int type = Util.inferContentType(uri.getLastPathSegment());
+    private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager, long startTimeMs, long endTimeMs) {
+        if (uri == null) {
+            throw new IllegalStateException("Invalid video uri");
+        }
+        int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
+                : uri.getLastPathSegment());
+        config.setDisableDisconnectError(this.disableDisconnectError);
+
+        MediaItem.Builder mediaItemBuilder = new MediaItem.Builder().setUri(uri);
+
+        if (adTagUrl != null) {
+            mediaItemBuilder.setAdsConfiguration(
+                    new MediaItem.AdsConfiguration.Builder(adTagUrl).build()
+            );
+        }
+
+        MediaItem mediaItem = mediaItemBuilder.build();
+        MediaSource mediaSource = null;
+        DrmSessionManagerProvider drmProvider = null;
+        if (drmSessionManager != null) {
+            drmProvider = new DrmSessionManagerProvider() {
+                @Override
+                public DrmSessionManager get(MediaItem mediaItem) {
+                    return drmSessionManager;
+                }
+            };
+        } else {
+            drmProvider = new DefaultDrmSessionManagerProvider();
+        }
         switch (type) {
-            case C.TYPE_SS:
-                return new SsMediaSource.Factory(
+            case CONTENT_TYPE_SS:
+                mediaSource = new SsMediaSource.Factory(
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                ).setDrmSessionManager(drmSessionManager)
-                        .setLoadErrorHandlingPolicy(
-                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                        ).createMediaSource(uri);
-            case C.TYPE_DASH:
-                return new DashMediaSource.Factory(
+                ).setDrmSessionManagerProvider(drmProvider)
+                 .setLoadErrorHandlingPolicy(
+                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                ).createMediaSource(mediaItem);
+                break;
+            case CONTENT_TYPE_DASH:
+                mediaSource = new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                ).setDrmSessionManager(drmSessionManager)
-                        .setLoadErrorHandlingPolicy(
-                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                        ).createMediaSource(uri);
-            case C.TYPE_HLS:
-                return new HlsMediaSource.Factory(
+                ).setDrmSessionManagerProvider(drmProvider)
+                 .setLoadErrorHandlingPolicy(
+                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                ).createMediaSource(mediaItem);
+                break;
+            case CONTENT_TYPE_HLS:
+                mediaSource = new HlsMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setDrmSessionManager(drmSessionManager)
-                        .setLoadErrorHandlingPolicy(
-                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                        ).createMediaSource(uri);
-            case C.TYPE_OTHER:
-                return new ProgressiveMediaSource.Factory(
+                ).setDrmSessionManagerProvider(drmProvider)
+                 .setLoadErrorHandlingPolicy(
+                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                ).createMediaSource(mediaItem);
+                break;
+            case CONTENT_TYPE_OTHER:
+                mediaSource = new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setDrmSessionManager(drmSessionManager)
-                        .setLoadErrorHandlingPolicy(
-                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                        ).createMediaSource(uri);
+                ).setDrmSessionManagerProvider(drmProvider)
+                 .setLoadErrorHandlingPolicy(
+                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                ).createMediaSource(mediaItem);
+                break;
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
         }
+
+        if (startTimeMs >= 0 && endTimeMs >= 0)
+        {
+            return new ClippingMediaSource(mediaSource, startTimeMs * 1000, endTimeMs * 1000);
+        } else if (startTimeMs >= 0) {
+            return new ClippingMediaSource(mediaSource, startTimeMs * 1000, TIME_END_OF_SOURCE);
+        } else if (endTimeMs >= 0) {
+            return new ClippingMediaSource(mediaSource, 0, endTimeMs * 1000);
+        }
+
+        return mediaSource;
     }
 
     private ArrayList<MediaSource> buildTextSources() {
@@ -1216,10 +1266,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(final Uri uri, final String extension, Map<String, String> headers) {
+    public void setSrc(final Uri uri, final long startTimeMs, final long endTimeMs, final String extension, Map<String, String> headers) {
 
         if (uri != null) {
-            boolean isSourceEqual = uri.equals(srcUri);
+            boolean isSourceEqual = uri.equals(srcUri) && startTimeMs == this.startTimeMs && endTimeMs == this.endTimeMs;
 
             if (srcUri == null && player != null) {
                 exoPlayerView.updateSurfaceView();
@@ -1227,6 +1277,8 @@ class ReactExoplayerView extends FrameLayout implements
             }
 
             this.srcUri = uri;
+            this.startTimeMs = startTimeMs;
+            this.endTimeMs = endTimeMs;
             this.extension = extension;
             this.requestHeaders = headers;
             this.mediaDataSourceFactory =
@@ -1249,6 +1301,8 @@ class ReactExoplayerView extends FrameLayout implements
             exoPlayerView.clearVideoView();
             player.stop(true);
             this.srcUri = null;
+            this.startTimeMs = -1;
+            this.endTimeMs = -1;
             this.extension = null;
             this.requestHeaders = null;
             this.mediaDataSourceFactory = null;
