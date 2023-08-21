@@ -314,7 +314,7 @@ render() {
       requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {},
       startTime: source.startTime || 0,
       endTime: source.endTime,
-      defaultCurrentTime: source.defaultCurrentTime || 0,
+      defaultCurrentTime: source.defaultCurrentTime,
     },
     onVideoLoadStart: this._onLoadStart,
     onVideoLoad: this._onLoad,

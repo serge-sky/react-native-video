@@ -150,7 +150,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         int startTimeMs = src.hasKey(PROP_SRC_START_TIME) ? src.getInt(PROP_SRC_START_TIME) : -1;
         int endTimeMs = src.hasKey(PROP_SRC_END_TIME) ? src.getInt(PROP_SRC_END_TIME) : -1;
-        int defaultCurrentTimeMs = src.hasKey(PROP_SRC_DEFAULT_CURRENT_TIME) ? src.getInt(PROP_SRC_DEFAULT_CURRENT_TIME) : 0;
+        int defaultCurrentTimeMs = src.hasKey(PROP_SRC_DEFAULT_CURRENT_TIME) ? src.getInt(PROP_SRC_DEFAULT_CURRENT_TIME) : -1;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
         String assetId = src.hasKey(PROP_SRC_ASSET_ID) ? src.getString(PROP_SRC_ASSET_ID) : null;
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;

@@ -1244,7 +1244,9 @@ class ReactExoplayerView extends FrameLayout implements
 
             if (srcUri == null && player != null) {
                 exoPlayerView.updateSurfaceView();
-                seekTo(defaultCurrentTimeMs);
+                if (defaultCurrentTimeMs > 0) {
+                    seekTo(defaultCurrentTimeMs);
+                }
                 player.play();
             }
 
