@@ -1,9 +1,5 @@
 package com.brentvatne.exoplayer;
 
-import static com.google.android.exoplayer2.C.CONTENT_TYPE_DASH;
-import static com.google.android.exoplayer2.C.CONTENT_TYPE_HLS;
-import static com.google.android.exoplayer2.C.CONTENT_TYPE_OTHER;
-import static com.google.android.exoplayer2.C.CONTENT_TYPE_SS;
 import static com.google.android.exoplayer2.C.TIME_END_OF_SOURCE;
 
 import static com.google.android.exoplayer2.drm.DefaultDrmSessionManager.MODE_PLAYBACK;
@@ -101,6 +97,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
+import com.google.android.exoplayer2.source.ClippingMediaSource;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -700,74 +697,47 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager, long startTimeMs, long endTimeMs) {
-        if (uri == null) {
-            throw new IllegalStateException("Invalid video uri");
-        }
-        int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
-                : uri.getLastPathSegment());
-        config.setDisableDisconnectError(this.disableDisconnectError);
-
-        MediaItem.Builder mediaItemBuilder = new MediaItem.Builder().setUri(uri);
-
-        if (adTagUrl != null) {
-            mediaItemBuilder.setAdsConfiguration(
-                    new MediaItem.AdsConfiguration.Builder(adTagUrl).build()
-            );
-        }
-
-        MediaItem mediaItem = mediaItemBuilder.build();
+        int type = Util.inferContentType(uri.getLastPathSegment());
         MediaSource mediaSource = null;
-        DrmSessionManagerProvider drmProvider = null;
-        if (drmSessionManager != null) {
-            drmProvider = new DrmSessionManagerProvider() {
-                @Override
-                public DrmSessionManager get(MediaItem mediaItem) {
-                    return drmSessionManager;
-                }
-            };
-        } else {
-            drmProvider = new DefaultDrmSessionManagerProvider();
-        }
         switch (type) {
-            case CONTENT_TYPE_SS:
+            case C.TYPE_SS:
                 mediaSource = new SsMediaSource.Factory(
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                ).setDrmSessionManagerProvider(drmProvider)
-                 .setLoadErrorHandlingPolicy(
-                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                ).createMediaSource(mediaItem);
+                ).setDrmSessionManager(drmSessionManager)
+                        .setLoadErrorHandlingPolicy(
+                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                        ).createMediaSource(uri);
                 break;
-            case CONTENT_TYPE_DASH:
+            case C.TYPE_DASH:
                 mediaSource = new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
-                ).setDrmSessionManagerProvider(drmProvider)
-                 .setLoadErrorHandlingPolicy(
-                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                ).createMediaSource(mediaItem);
+                ).setDrmSessionManager(drmSessionManager)
+                        .setLoadErrorHandlingPolicy(
+                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                        ).createMediaSource(uri);
                 break;
-            case CONTENT_TYPE_HLS:
+            case C.TYPE_HLS:
                 mediaSource = new HlsMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setDrmSessionManagerProvider(drmProvider)
-                 .setLoadErrorHandlingPolicy(
-                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                ).createMediaSource(mediaItem);
+                ).setDrmSessionManager(drmSessionManager)
+                        .setLoadErrorHandlingPolicy(
+                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                        ).createMediaSource(uri);
                 break;
-            case CONTENT_TYPE_OTHER:
+            case C.TYPE_OTHER:
                 mediaSource = new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
-                ).setDrmSessionManagerProvider(drmProvider)
-                 .setLoadErrorHandlingPolicy(
-                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
-                ).createMediaSource(mediaItem);
+                ).setDrmSessionManager(drmSessionManager)
+                        .setLoadErrorHandlingPolicy(
+                                config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                        ).createMediaSource(uri);
                 break;
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
         }
-
         if (startTimeMs >= 0 && endTimeMs >= 0)
         {
             return new ClippingMediaSource(mediaSource, startTimeMs * 1000, endTimeMs * 1000);
@@ -779,6 +749,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         return mediaSource;
     }
+
 
     private ArrayList<MediaSource> buildTextSources() {
         ArrayList<MediaSource> textSources = new ArrayList<>();
