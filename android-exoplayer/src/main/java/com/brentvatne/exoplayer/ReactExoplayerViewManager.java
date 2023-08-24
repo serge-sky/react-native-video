@@ -31,6 +31,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
+    private static final String PROP_SRC_START_TIME = "startTime";
+    private static final String PROP_SRC_END_TIME = "endTime";
+    private static final String PROP_SRC_DEFAULT_CURRENT_TIME = "defaultCurrentTime";
     private static final String PROP_SRC_TYPE = "type";
     private static final String PROP_SRC_ASSET_ID = "assetId";
     private static final String PROP_DRM = "drm";
@@ -145,6 +148,9 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
+        int startTimeMs = src.hasKey(PROP_SRC_START_TIME) ? src.getInt(PROP_SRC_START_TIME) : -1;
+        int endTimeMs = src.hasKey(PROP_SRC_END_TIME) ? src.getInt(PROP_SRC_END_TIME) : -1;
+        int defaultCurrentTimeMs = src.hasKey(PROP_SRC_DEFAULT_CURRENT_TIME) ? src.getInt(PROP_SRC_DEFAULT_CURRENT_TIME) : -1;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
         String assetId = src.hasKey(PROP_SRC_ASSET_ID) ? src.getString(PROP_SRC_ASSET_ID) : null;
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
@@ -158,7 +164,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             Uri srcUri = Uri.parse(uriString);
 
             if (srcUri != null) {
-                videoView.setSrc(srcUri, extension, headers);
+                videoView.setSrc(srcUri, startTimeMs, endTimeMs, extension, headers, defaultCurrentTimeMs);
             }
             if (assetId != null) {
                 videoView.setAssetId(assetId);

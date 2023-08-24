@@ -1,5 +1,7 @@
 package com.brentvatne.exoplayer;
 
+import static com.google.android.exoplayer2.C.TIME_END_OF_SOURCE;
+
 import static com.google.android.exoplayer2.drm.DefaultDrmSessionManager.MODE_PLAYBACK;
 
 import android.annotation.SuppressLint;
@@ -95,6 +97,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
+import com.google.android.exoplayer2.source.ClippingMediaSource;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -153,6 +156,9 @@ class ReactExoplayerView extends FrameLayout implements
 
     // Props from React
     private Uri srcUri;
+    private long startTimeMs = -1;
+    private long endTimeMs = -1;
+    private long defaultCurrentTimeMs = -1;
     private String extension;
     private boolean repeat;
     private String audioTrackType;
@@ -595,7 +601,7 @@ class ReactExoplayerView extends FrameLayout implements
                     // End DRM
 
                     ArrayList<MediaSource> mediaSourceList = buildTextSources();
-                    MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager);
+                    MediaSource videoSource = buildMediaSource(srcUri, extension, drmSessionManager, startTimeMs, endTimeMs);
                     MediaSource mediaSource;
                     if (mediaSourceList.size() == 0) {
                         mediaSource = videoSource;
@@ -607,15 +613,22 @@ class ReactExoplayerView extends FrameLayout implements
                         mediaSource = new MergingMediaSource(textSourceArray);
                     }
 
-                    boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+//                    boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+//                    if (haveResumePosition) {
+//                        player.seekTo(resumeWindow, resumePosition);
+//                    }
+
+                    boolean haveResumePosition = defaultCurrentTimeMs > 0;
                     if (haveResumePosition) {
-                        player.seekTo(resumeWindow, resumePosition);
+                        player.seekTo(defaultCurrentTimeMs);
                     }
+
                     player.prepare(mediaSource, !haveResumePosition, false);
                     playerNeedsSource = false;
 
                     reLayout(exoPlayerView);
                     eventEmitter.loadStart();
+
                     loadVideoStarted = true;
                 }
 
@@ -691,44 +704,60 @@ class ReactExoplayerView extends FrameLayout implements
         return drmSessionManager;
     }
 
-    private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager) {
+    private MediaSource buildMediaSource(Uri uri, String overrideExtension, DrmSessionManager drmSessionManager, long startTimeMs, long endTimeMs) {
         int type = Util.inferContentType(uri.getLastPathSegment());
+        MediaSource mediaSource = null;
         switch (type) {
             case C.TYPE_SS:
-                return new SsMediaSource.Factory(
+                mediaSource = new SsMediaSource.Factory(
                         new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
                 ).setDrmSessionManager(drmSessionManager)
                         .setLoadErrorHandlingPolicy(
                                 config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                         ).createMediaSource(uri);
+                break;
             case C.TYPE_DASH:
-                return new DashMediaSource.Factory(
+                mediaSource = new DashMediaSource.Factory(
                         new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
                         buildDataSourceFactory(false)
                 ).setDrmSessionManager(drmSessionManager)
                         .setLoadErrorHandlingPolicy(
                                 config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                         ).createMediaSource(uri);
+                break;
             case C.TYPE_HLS:
-                return new HlsMediaSource.Factory(
+                mediaSource = new HlsMediaSource.Factory(
                         mediaDataSourceFactory
                 ).setDrmSessionManager(drmSessionManager)
                         .setLoadErrorHandlingPolicy(
                                 config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                         ).createMediaSource(uri);
+                break;
             case C.TYPE_OTHER:
-                return new ProgressiveMediaSource.Factory(
+                mediaSource = new ProgressiveMediaSource.Factory(
                         mediaDataSourceFactory
                 ).setDrmSessionManager(drmSessionManager)
                         .setLoadErrorHandlingPolicy(
                                 config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
                         ).createMediaSource(uri);
+                break;
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
         }
+        if (startTimeMs >= 0 && endTimeMs >= 0)
+        {
+            return new ClippingMediaSource(mediaSource, startTimeMs * 1000, endTimeMs * 1000);
+        } else if (startTimeMs >= 0) {
+            return new ClippingMediaSource(mediaSource, startTimeMs * 1000, TIME_END_OF_SOURCE);
+        } else if (endTimeMs >= 0) {
+            return new ClippingMediaSource(mediaSource, 0, endTimeMs * 1000);
+        }
+
+        return mediaSource;
     }
+
 
     private ArrayList<MediaSource> buildTextSources() {
         ArrayList<MediaSource> textSources = new ArrayList<>();
@@ -1216,16 +1245,28 @@ class ReactExoplayerView extends FrameLayout implements
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(final Uri uri, final String extension, Map<String, String> headers) {
+    public void setSrc(final Uri uri, final long startTimeMs, final long endTimeMs, final String extension, Map<String, String> headers, final long defaultCurrentTimeMs) {
+
         if (uri != null) {
-            boolean isSourceEqual = uri.equals(srcUri);
+            boolean isSourceEqual = uri.equals(srcUri) && startTimeMs == this.startTimeMs && endTimeMs == this.endTimeMs;
+
+            if (srcUri == null && player != null) {
+                exoPlayerView.updateSurfaceView();
+                player.play();
+            }
+
+
 
             this.srcUri = uri;
+            this.startTimeMs = startTimeMs;
+            this.endTimeMs = endTimeMs;
+            this.defaultCurrentTimeMs = defaultCurrentTimeMs;
             this.extension = extension;
             this.requestHeaders = headers;
             this.mediaDataSourceFactory =
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             this.requestHeaders);
+
             if (!isSourceEqual) {
                 analyticsMeta = null;
                 if (youboraPlugin != null) {
@@ -1240,8 +1281,13 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void clearSrc() {
         if (srcUri != null) {
-            player.stop(true);
+            exoPlayerView.clearVideoView();
+            if (player != null) {
+                player.stop(true);
+            }
             this.srcUri = null;
+            this.startTimeMs = -1;
+            this.endTimeMs = -1;
             this.extension = null;
             this.requestHeaders = null;
             this.mediaDataSourceFactory = null;

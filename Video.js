@@ -277,7 +277,7 @@ export default class Video extends Component {
     }
 
     if (!uri) {
-      console.warn('Trying to load empty source.');
+      // console.warn('Trying to load empty source.');
     }
 
     const isNetwork = !!(uri && uri.match(/^https?:/));
@@ -310,6 +310,9 @@ export default class Video extends Component {
         mainVer: source.mainVer || 0,
         patchVer: source.patchVer || 0,
         requestHeaders: source.headers ? this.stringsOnlyObject(source.headers) : {},
+        startTime: source.startTime || 0,
+        endTime: source.endTime,
+        defaultCurrentTime: source.defaultCurrentTime,
       },
       onVideoLoadStart: this._onLoadStart,
       onVideoLoad: this._onLoad,
