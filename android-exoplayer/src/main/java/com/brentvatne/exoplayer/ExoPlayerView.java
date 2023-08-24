@@ -95,7 +95,6 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     public void clearVideoView() {
-        Log.d("PlayerSky", "clearVideoView");
         if (surfaceView instanceof TextureView) {
             player.clearVideoTextureView((TextureView) surfaceView);
         } else if (surfaceView instanceof SurfaceView) {
