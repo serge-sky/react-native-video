@@ -1739,7 +1739,9 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void fastForwardOrRewind(long incrementMs) {
-        mainHandler.removeCallbacksAndMessages(null);
+        if (mainHandler != null) {
+            mainHandler.removeCallbacksAndMessages(null);
+        }
         if (player == null || incrementMs == 1000L) {
             return;
         }
