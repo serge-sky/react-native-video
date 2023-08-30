@@ -298,10 +298,16 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostDestroy() {
+        if (mainHandler != null) {
+            mainHandler.removeCallbacksAndMessages(null);
+        }
         stopPlayback();
     }
 
     public void cleanUpResources() {
+        if (mainHandler != null) {
+            mainHandler.removeCallbacksAndMessages(null);
+        }
         stopPlayback();
     }
 
@@ -1730,5 +1736,29 @@ class ReactExoplayerView extends FrameLayout implements
     }
     public void setSubtitleStyle(SubtitleStyle style) {
         exoPlayerView.setSubtitleStyle(style);
+    }
+
+    public void fastForwardOrRewind(long incrementMs) {
+        if (mainHandler != null) {
+            mainHandler.removeCallbacksAndMessages(null);
+        }
+        if (player == null || incrementMs == 1000L) {
+            return;
+        }
+        long currentPosition = seekTime;
+        if(seekTime <= 0) {
+            currentPosition = player.getCurrentPosition();
+        }
+        long newPosition = currentPosition + incrementMs;
+
+        // Ensure newPosition is within valid range
+        long mediaDuration = player.getDuration();
+        newPosition = Math.max(0, Math.min(newPosition, mediaDuration));
+        seekTo(newPosition);
+        currentPosition = newPosition;
+
+        if (newPosition > 0 && newPosition < mediaDuration) {
+            mainHandler.postDelayed(() -> fastForwardOrRewind(incrementMs), 1000);
+        }
     }
 }
