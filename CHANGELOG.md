@@ -1,8 +1,12 @@
 ## Changelog
 
-### Version 
+### Version 5.2.0
 
-- Fix Android AudioFocus bug that could cause player to not respond to play/pause in some instances [#2311](https://github.com/react-native-video/react-native-video/pull/2311)
+- Fix for tvOS native audio menu language selector
+- Update ExoPlayer to allow pre-init and content clear [#2412] (https://github.com/react-native-video/react-native-video/pull/2412)
+- iOS rate is reset to 1.0 after play/pause [#2167] (https://github.com/react-native-video/react-native-video/pull/2167)
+- Upgrade ExoPlayer to 2.13.2 [#2317] (https://github.com/react-native-video/react-native-video/pull/2317)
+- Fix AudioFocus pausing video when attempting to play [#2311] (https://github.com/react-native-video/react-native-video/pull/2311)
 
 ### Version 5.1.0-alpha9
 
@@ -18,7 +22,7 @@
 
 - Basic support for DRM on iOS and Android [#1445](https://github.com/react-native-community/react-native-video/pull/1445)
 
-### Version 5.1.0-alpha6 
+### Version 5.1.0-alpha6
 
 - Fix iOS bug which would break size of views when video is displayed with controls on a non full-screen React view. [#1931](https://github.com/react-native-community/react-native-video/pull/1931)
 - Fix video dimensions being undefined when playing HLS in ios. [#1992](https://github.com/react-native-community/react-native-video/pull/1992)

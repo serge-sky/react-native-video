@@ -372,7 +372,7 @@ static int const RCTVideoUnset = -1;
 - (void)setAnalyticsMeta:(NSDictionary *)analyticsMeta
 {
     _analyticsMeta = analyticsMeta;
-    
+
     if (_plugin && _contentId != [_analyticsMeta objectForKey:@"contentId"]) {
         [_plugin removeAdapter];
         [_plugin fireStop];
@@ -419,7 +419,7 @@ static int const RCTVideoUnset = -1;
 
       [self->_player addObserver:self forKeyPath:externalPlaybackActive options:0 context:nil];
       self->_isExternalPlaybackActiveObserverRegistered = YES;
-      
+
       NSString *_origin = [self->_analyticsMeta objectForKey:@"origin"];
       if ([_origin length] == 0)
       {
@@ -982,6 +982,7 @@ static int const RCTVideoUnset = -1;
 - (void)setIgnoreSilentSwitch:(NSString *)ignoreSilentSwitch
 {
   _ignoreSilentSwitch = ignoreSilentSwitch;
+  [self configureAudio];
   [self applyModifiers];
 }
 
@@ -997,29 +998,8 @@ static int const RCTVideoUnset = -1;
     [_player pause];
     [_player setRate:0.0];
   } else {
-    AVAudioSession *session = [AVAudioSession sharedInstance];
-    AVAudioSessionCategory category = nil;
-    AVAudioSessionCategoryOptions options = nil;
 
-    if([_ignoreSilentSwitch isEqualToString:@"ignore"]) {
-      category = AVAudioSessionCategoryPlayback;
-    } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
-      category = AVAudioSessionCategoryAmbient;
-    }
-
-    if([_mixWithOthers isEqualToString:@"mix"]) {
-      options = AVAudioSessionCategoryOptionMixWithOthers;
-    } else if([_mixWithOthers isEqualToString:@"duck"]) {
-      options = AVAudioSessionCategoryOptionDuckOthers;
-    }
-
-    if (category != nil && options != nil) {
-      [session setCategory:category withOptions:options error:nil];
-    } else if (category != nil && options == nil) {
-      [session setCategory:category error:nil];
-    } else if (category == nil && options != nil) {
-      [session setCategory:session.category withOptions:options error:nil];
-    }
+    [self configureAudio];
 
     if (@available(iOS 10.0, *) && !_automaticallyWaitsToMinimizeStalling) {
       [_player playImmediatelyAtRate:_rate];
@@ -1153,6 +1133,33 @@ static int const RCTVideoUnset = -1;
   [self setAllowsExternalPlayback:_allowsExternalPlayback];
 }
 
+- (void)configureAudio
+{
+    AVAudioSession *session = [AVAudioSession sharedInstance];
+    AVAudioSessionCategory category = nil;
+    AVAudioSessionCategoryOptions options = nil;
+
+    if([_ignoreSilentSwitch isEqualToString:@"ignore"]) {
+      category = AVAudioSessionCategoryPlayback;
+    } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
+      category = AVAudioSessionCategoryAmbient;
+    }
+
+    if([_mixWithOthers isEqualToString:@"mix"]) {
+      options = AVAudioSessionCategoryOptionMixWithOthers;
+    } else if([_mixWithOthers isEqualToString:@"duck"]) {
+      options = AVAudioSessionCategoryOptionDuckOthers;
+    }
+
+    if (category != nil && options != nil) {
+      [session setCategory:category withOptions:options error:nil];
+    } else if (category != nil && options == nil) {
+      [session setCategory:category error:nil];
+    } else if (category == nil && options != nil) {
+      [session setCategory:session.category withOptions:options error:nil];
+    }
+}
+
 - (void)setRepeat:(BOOL)repeat {
   _repeat = repeat;
 }
@@ -1194,12 +1201,20 @@ static int const RCTVideoUnset = -1;
       }
     }
   } else { // default. invalid type or "system"
-    [_player.currentItem selectMediaOptionAutomaticallyInMediaSelectionGroup:group];
-    return;
+    #if TARGET_OS_TV
+    // Do noting. Fix for tvOS native audio menu language selector
+    #else
+      [_player.currentItem selectMediaOptionAutomaticallyInMediaSelectionGroup:group];
+      return;
+    #endif
   }
 
-  // If a match isn't found, option will be nil and text tracks will be disabled
-  [_player.currentItem selectMediaOption:mediaOption inMediaSelectionGroup:group];
+    #if TARGET_OS_TV
+    // Do noting. Fix for tvOS native audio menu language selector
+    #else
+       // If a match isn't found, option will be nil and text tracks will be disabled
+       [_player.currentItem selectMediaOption:mediaOption inMediaSelectionGroup:group];
+    #endif
 }
 
 - (void)setSelectedAudioTrack:(NSDictionary *)selectedAudioTrack {
