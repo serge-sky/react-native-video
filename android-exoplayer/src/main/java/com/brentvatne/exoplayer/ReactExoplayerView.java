@@ -1309,9 +1309,11 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setProgressUpdateInterval(final float progressUpdateInterval) {
         mProgressUpdateInterval = progressUpdateInterval;
-        progressHandler.removeCallbacksAndMessages(null);
-        Message msg = Message.obtain(progressHandler, SHOW_PROGRESS);
-        progressHandler.sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
+        if (progressHandler != null) {
+            progressHandler.removeCallbacksAndMessages(null);
+            Message msg = Message.obtain(progressHandler, SHOW_PROGRESS);
+            progressHandler.sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
+        }
     }
 
     public void setReportBandwidth(boolean reportBandwidth) {
