@@ -298,16 +298,12 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostDestroy() {
-        if (mainHandler != null) {
-            mainHandler.removeCallbacksAndMessages(null);
-        }
+        mainHandler.removeCallbacksAndMessages(null);
         stopPlayback();
     }
 
     public void cleanUpResources() {
-        if (mainHandler != null) {
-            mainHandler.removeCallbacksAndMessages(null);
-        }
+        mainHandler.removeCallbacksAndMessages(null);
         stopPlayback();
     }
 
@@ -1309,11 +1305,9 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setProgressUpdateInterval(final float progressUpdateInterval) {
         mProgressUpdateInterval = progressUpdateInterval;
-        if (progressHandler != null) {
-            progressHandler.removeCallbacksAndMessages(null);
-            Message msg = Message.obtain(progressHandler, SHOW_PROGRESS);
-            progressHandler.sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
-        }
+        progressHandler.removeCallbacksAndMessages(null);
+        Message msg = Message.obtain(progressHandler, SHOW_PROGRESS);
+        progressHandler.sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
     }
 
     public void setReportBandwidth(boolean reportBandwidth) {
@@ -1743,15 +1737,14 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setSubtitleStyle(style);
     }
 
-    public void fastForwardOrRewind(long incrementMs) {
-        if (mainHandler != null) {
-            mainHandler.removeCallbacksAndMessages(null);
-        }
+    public void fastForwardOrRewind(long incrementMs, long lastPosition) {
+        mainHandler.removeCallbacksAndMessages(null);
         if (player == null || incrementMs == 1000L) {
             return;
         }
-        long currentPosition = seekTime;
-        if(seekTime <= 0) {
+
+        long currentPosition = lastPosition;
+        if (currentPosition < 0) {
             currentPosition = player.getCurrentPosition();
         }
         long newPosition = currentPosition + incrementMs;
@@ -1760,10 +1753,9 @@ class ReactExoplayerView extends FrameLayout implements
         long mediaDuration = player.getDuration();
         newPosition = Math.max(0, Math.min(newPosition, mediaDuration));
         seekTo(newPosition);
-        currentPosition = newPosition;
-
+        final long lastSeekPosition = newPosition;
         if (newPosition > 0 && newPosition < mediaDuration) {
-            mainHandler.postDelayed(() -> fastForwardOrRewind(incrementMs), 1000);
+            mainHandler.postDelayed(() -> fastForwardOrRewind(incrementMs, lastSeekPosition), 1000);
         }
     }
 }
