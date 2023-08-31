@@ -374,7 +374,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_FF_RW)
     public void fastForwardOrRewind(final ReactExoplayerView videoView, final String incrementMs) {
-        videoView.fastForwardOrRewind(Long.parseLong(incrementMs));
+        videoView.fastForwardOrRewind(Long.parseLong(incrementMs), -1L);
     }
 
     private boolean startsWithValidScheme(String uriString) {
