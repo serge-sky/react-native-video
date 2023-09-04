@@ -88,7 +88,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_ANALYTICS_META = "analyticsMeta";
     private static final String PROP_LICENCE_PERSISTENCE_ENABLED = "licencePersistenceEnabled";
     private static final String PROP_LICENCE_MULTI_SESSION_ENABLED = "licenceMultiSessionEnabled";
-    private static final String PROP_SUBTITLE_STYLE = "subtitleStyle";
     private static final String PROP_FF_RW = "fastForwardOrRewind";
 
     private ReactExoplayerConfig config;

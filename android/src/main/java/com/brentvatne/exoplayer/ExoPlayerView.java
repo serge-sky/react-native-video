@@ -29,7 +29,7 @@ import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.AdViewProvider;
 import com.google.android.exoplayer2.ui.SubtitleView;
-import com.google.android.exoplayer2.text.CaptionStyleCompat;
+import com.google.android.exoplayer2.ui.CaptionStyleCompat;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.video.VideoSize;
 
@@ -154,7 +154,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
         shutterView.setBackgroundColor(color);
     }
 
-    private void updateSurfaceView() {
+    public void updateSurfaceView() {
         View view;
         if (!useTextureView || useSecureView) {
             view = new SurfaceView(context);
@@ -300,7 +300,7 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
             for (Cue cue : cues) {
                 updatedCues.add(new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, Cue.TYPE_UNSET, Cue.LINE_TYPE_FRACTION, Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET, cue.size));
             }
-            subtitleLayout.onCues(updatedCues);
+            subtitleLayout.setCues(updatedCues);
         }
 
         // ExoPlayer.VideoListener implementation

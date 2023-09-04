@@ -34,6 +34,7 @@ import com.brentvatne.exoplayer.AudioOutput;
 import com.brentvatne.react.R;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
+import com.facebook.react.BuildConfig;
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableArray;
@@ -901,7 +902,6 @@ class ReactExoplayerView extends FrameLayout implements
                     drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i], keyRequestPropertiesArray[i + 1]);
                 }
             }
-            FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(uuid);
             if (hasDrmFailed) {
                 // When DRM fails using L1 we want to switch to L3
                 mediaDrm.setPropertyString("securityLevel", "L3");
@@ -1505,7 +1505,6 @@ class ReactExoplayerView extends FrameLayout implements
             Track textTrack = new Track();
             textTrack.m_index = i;
             textTrack.m_title = format.id != null ? format.id : "";
-            textTrack.m_label = format.label != null ? format.label : "";
             textTrack.m_mimeType = format.sampleMimeType;
             textTrack.m_language = format.language != null ? format.language : "";
             textTrack.m_isSelected = isTrackSelected(selection, group, 0 );
