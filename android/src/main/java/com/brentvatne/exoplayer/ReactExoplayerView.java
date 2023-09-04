@@ -5,6 +5,7 @@ import static com.google.android.exoplayer2.C.CONTENT_TYPE_HLS;
 import static com.google.android.exoplayer2.C.CONTENT_TYPE_OTHER;
 import static com.google.android.exoplayer2.C.CONTENT_TYPE_SS;
 import static com.google.android.exoplayer2.C.TIME_END_OF_SOURCE;
+import static com.google.android.exoplayer2.drm.DefaultDrmSessionManager.MODE_PLAYBACK;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -17,6 +18,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
@@ -46,6 +48,7 @@ import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.SeekParameters;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.Tracks;
@@ -57,6 +60,7 @@ import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSessionManagerProvider;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
 import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
+import com.google.android.exoplayer2.drm.OfflineLicenseHelper;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.mediacodec.MediaCodecInfo;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
@@ -68,7 +72,9 @@ import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
+import com.google.android.exoplayer2.source.dash.DashUtil;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
+import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
@@ -97,6 +103,12 @@ import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
 import com.google.android.exoplayer2.source.ads.AdsMediaSource;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.source.ClippingMediaSource;
+import com.npaw.youbora.lib6.YouboraLog;
+import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter;
+import com.npaw.youbora.lib6.plugin.Options;
+import com.npaw.youbora.lib6.plugin.Plugin;
+
+import java.io.IOException;
 
 import com.google.common.collect.ImmutableList;
 import java.net.CookieHandler;
@@ -114,6 +126,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.lang.Integer;
+
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -145,6 +162,7 @@ class ReactExoplayerView extends FrameLayout implements
     private View playPauseControlContainer;
     private Player.Listener eventListener;
 
+    private HttpDataSource.Factory httpDataSourceFactory;
     private ExoPlayerView exoPlayerView;
     private FullScreenPlayerView fullScreenPlayerView;
     private ImaAdsLoader adsLoader;
@@ -153,6 +171,7 @@ class ReactExoplayerView extends FrameLayout implements
     private ExoPlayer player;
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
+    private boolean playerNeedsNewLicence;
 
     private int resumeWindow;
     private long resumePosition;
@@ -187,6 +206,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Uri srcUri;
     private long startTimeMs = -1;
     private long endTimeMs = -1;
+    private long defaultCurrentTimeMs = -1;
     private String extension;
     private boolean repeat;
     private String audioTrackType;
@@ -209,7 +229,11 @@ class ReactExoplayerView extends FrameLayout implements
     private UUID drmUUID = null;
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
+    private String assetId = null;
+    private boolean licencePersistingEnabled = false;
+    private boolean licenceMultiSessionEnabled = false;
     private boolean controls;
+    private ReadableMap analyticsMeta;
     private Uri adTagUrl;
     // \ End props
 
@@ -218,6 +242,8 @@ class ReactExoplayerView extends FrameLayout implements
     private final AudioManager audioManager;
     private final AudioBecomingNoisyReceiver audioBecomingNoisyReceiver;
     private final AudioManager.OnAudioFocusChangeListener audioFocusChangeListener;
+    private Plugin youboraPlugin;
+    private String contentId;
 
     // store last progress event values to avoid sending unnecessary messages
     private long lastPos = -1;
@@ -288,7 +314,9 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void createViews() {
         clearResumePosition();
+        LicencesDataStore.init(getContext());
         mediaDataSourceFactory = buildDataSourceFactory(true);
+        httpDataSourceFactory = buildHttpDataSourceFactory(false);
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
@@ -342,10 +370,12 @@ class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onHostDestroy() {
+        mainHandler.removeCallbacksAndMessages(null);
         stopPlayback();
     }
 
     public void cleanUpResources() {
+        mainHandler.removeCallbacksAndMessages(null);
         stopPlayback();
     }
 
@@ -494,6 +524,111 @@ class ReactExoplayerView extends FrameLayout implements
         view.layout(view.getLeft(), view.getTop(), view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
+    private void initialiseYoubora() {
+        if (analyticsMeta == null) return;
+
+        if (BuildConfig.DEBUG) {
+            YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
+        }
+
+        contentId = analyticsMeta.getString("contentId");
+
+        Options youboraOptions = new Options();
+        if (analyticsMeta.hasKey("accountCode")) {
+            youboraOptions.setAccountCode(analyticsMeta.getString("accountCode"));
+        }
+        if (analyticsMeta.hasKey("enabled")) {
+            youboraOptions.setEnabled(analyticsMeta.getBoolean("enabled"));
+        }
+        if (analyticsMeta.hasKey("username")) {
+            youboraOptions.setUsername(analyticsMeta.getString("username"));
+        }
+        if (analyticsMeta.hasKey("contentTransactionCode")) {
+            youboraOptions.setContentTransactionCode(analyticsMeta.getString("contentTransactionCode"));
+        }
+
+
+        if (analyticsMeta.hasKey("contentCustomDimension6")) {
+            youboraOptions.setContentCustomDimension6(analyticsMeta.getString("contentCustomDimension6"));
+        }
+        if (analyticsMeta.hasKey("contentCustomDimension7")) {
+            youboraOptions.setContentCustomDimension7(analyticsMeta.getString("contentCustomDimension7"));
+        }
+
+        if (analyticsMeta.hasKey("contentIsLive")) {
+            youboraOptions.setContentIsLive(analyticsMeta.getBoolean("contentIsLive"));
+        }
+        if (analyticsMeta.hasKey("contentType")) {
+            youboraOptions.setContentType(analyticsMeta.getString("contentType"));
+        }
+        if (analyticsMeta.hasKey("contentTitle")) {
+            youboraOptions.setContentTitle(analyticsMeta.getString("contentTitle"));
+        }
+        if (analyticsMeta.hasKey("program")) {
+            youboraOptions.setProgram(analyticsMeta.getString("program"));
+        }
+        if (analyticsMeta.hasKey("contentResource")) {
+            youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+        }
+        if (analyticsMeta.hasKey("contentSeason")) {
+            youboraOptions.setContentSeason(analyticsMeta.getString("contentSeason"));
+        }
+        if (analyticsMeta.hasKey("contentEpisodeTitle")) {
+            youboraOptions.setContentEpisodeTitle(analyticsMeta.getString("contentEpisodeTitle"));
+        }
+        if (analyticsMeta.hasKey("contentChannel")) {
+            youboraOptions.setContentChannel(analyticsMeta.getString("contentChannel"));
+        }
+        if (analyticsMeta.hasKey("contentId")) {
+            youboraOptions.setContentId(analyticsMeta.getString("contentId"));
+        }
+        if (analyticsMeta.hasKey("contentGenre")) {
+            youboraOptions.setContentGenre(analyticsMeta.getString("contentGenre"));
+        }
+        if (analyticsMeta.hasKey("contentDuration")) {
+            youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
+        }
+        if (analyticsMeta.hasKey("appName")) {
+            youboraOptions.setAppName(analyticsMeta.getString("appName"));
+        }
+        if (analyticsMeta.hasKey("appReleaseVersion")) {
+            youboraOptions.setAppReleaseVersion(analyticsMeta.getString("appReleaseVersion"));
+        }
+        if (analyticsMeta.hasKey("contentResource")) {
+            youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+        }
+        if (analyticsMeta.hasKey("contentDuration")) {
+            youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
+        }
+        if (analyticsMeta.hasKey("contentResource")) {
+            youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
+        }
+        if (analyticsMeta.hasKey("contentPlaybackType")) {
+            youboraOptions.setContentPlaybackType(analyticsMeta.getString("contentPlaybackType"));
+        }
+        youboraOptions.setAutoDetectBackground(true);
+
+        youboraPlugin = new Plugin(youboraOptions, getContext());
+
+        if (analyticsMeta.hasKey("offline")) {
+            youboraOptions.setOffline(analyticsMeta.getBoolean("offline"));
+
+            if (!analyticsMeta.getBoolean("offline")) {
+                youboraPlugin.fireOfflineEvents();
+            }
+        }
+
+        Activity activity = themedReactContext.getCurrentActivity();
+        if (activity == null) return;
+
+        youboraPlugin.setActivity(activity);
+        if (player != null && youboraPlugin != null && youboraPlugin.getAdapter() == null) {
+            Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
+            youboraPlugin.setAdapter(adapter);
+            youboraPlugin.getAdapter().fireStart();
+        }
+    }
+
     private class RNVLoadControl extends DefaultLoadControl {
         private int availableHeapInBytes = 0;
         private Runtime runtime;
@@ -560,6 +695,9 @@ class ReactExoplayerView extends FrameLayout implements
                     }
                     if (playerNeedsSource && srcUri != null) {
                         exoPlayerView.invalidateAspectRatio();
+
+                        cacheLicense();
+
                         // DRM session manager creation must be done on a different thread to prevent crashes so we start a new thread
                         ExecutorService es = Executors.newSingleThreadExecutor();
                         es.execute(new Runnable() {
@@ -573,7 +711,7 @@ class ReactExoplayerView extends FrameLayout implements
                                     eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
                                     return;
                                 }
-                                    
+
                                 if (activity == null) {
                                     Log.e("ExoPlayer Exception", "Failed to initialize Player!");
                                     eventEmitter.error("Failed to initialize Player!", new Exception("Current Activity is null!"), "1001");
@@ -630,7 +768,7 @@ class ReactExoplayerView extends FrameLayout implements
         );
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
-                        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+                        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF).setEnableDecoderFallback(true);
 
         // Create an AdsLoader.
         adsLoader = new ImaAdsLoader.Builder(themedReactContext).setAdEventListener(this).build();
@@ -642,6 +780,7 @@ class ReactExoplayerView extends FrameLayout implements
                     .setTrackSelector(self.trackSelector)
                     .setBandwidthMeter(bandwidthMeter)
                     .setLoadControl(loadControl)
+                    .setSeekParameters(SeekParameters.CLOSEST_SYNC)
                     .setMediaSourceFactory(mediaSourceFactory)
                     .build();
         player.addListener(self);
@@ -656,6 +795,9 @@ class ReactExoplayerView extends FrameLayout implements
 
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
+        if (analyticsMeta != null) {
+            initialiseYoubora();
+        }
         changeAudioOutput(this.audioOutput);
     }
 
@@ -715,9 +857,14 @@ class ReactExoplayerView extends FrameLayout implements
             }
         }
 
-        boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+//                    boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+//                    if (haveResumePosition) {
+//                        player.seekTo(resumeWindow, resumePosition);
+//                    }
+
+        boolean haveResumePosition = defaultCurrentTimeMs > 0;
         if (haveResumePosition) {
-            player.seekTo(resumeWindow, resumePosition);
+            player.seekTo(defaultCurrentTimeMs);
         }
         player.prepare(mediaSource, !haveResumePosition, false);
         playerNeedsSource = false;
@@ -748,6 +895,7 @@ class ReactExoplayerView extends FrameLayout implements
         try {
             HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl,
                     buildHttpDataSourceFactory(false));
+            FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(uuid);
             if (keyRequestPropertiesArray != null) {
                 for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
                     drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i], keyRequestPropertiesArray[i + 1]);
@@ -758,7 +906,16 @@ class ReactExoplayerView extends FrameLayout implements
                 // When DRM fails using L1 we want to switch to L3
                 mediaDrm.setPropertyString("securityLevel", "L3");
             }
-            return new DefaultDrmSessionManager(uuid, mediaDrm, drmCallback, null, false, 3);
+            DefaultDrmSessionManager drmSessionManager = new DefaultDrmSessionManager(uuid, mediaDrm, drmCallback,
+                    null, this.licenceMultiSessionEnabled, 3);
+
+            if (licencePersistingEnabled) {
+                byte[] key = LicencesDataStore.getLicence(this.assetId);
+                if (key != null) {
+                    drmSessionManager.setMode(MODE_PLAYBACK, key);
+                }
+            }
+            return drmSessionManager;
         } catch(UnsupportedDrmException ex) {
             // Unsupported DRM exceptions are handled by the calling method
             throw ex;
@@ -897,6 +1054,9 @@ class ReactExoplayerView extends FrameLayout implements
             player.removeListener(this);
             trackSelector = null;
             player = null;
+            if (youboraPlugin != null) {
+                youboraPlugin.getAdapter().fireStop();
+            }
         }
         if (adsLoader != null) {
             adsLoader.release();
@@ -1345,6 +1505,7 @@ class ReactExoplayerView extends FrameLayout implements
             Track textTrack = new Track();
             textTrack.m_index = i;
             textTrack.m_title = format.id != null ? format.id : "";
+            textTrack.m_label = format.label != null ? format.label : "";
             textTrack.m_mimeType = format.sampleMimeType;
             textTrack.m_language = format.language != null ? format.language : "";
             textTrack.m_isSelected = isTrackSelected(selection, group, 0 );
@@ -1461,6 +1622,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
         eventEmitter.error(errorString, e, errorCode);
         playerNeedsSource = true;
+        playerNeedsNewLicence = true;
         if (isBehindLiveWindow(e)) {
             clearResumePosition();
             initializePlayer();
@@ -1495,13 +1657,20 @@ class ReactExoplayerView extends FrameLayout implements
 
     // ReactExoplayerViewManager public api
 
-    public void setSrc(final Uri uri, final long startTimeMs, final long endTimeMs, final String extension, Map<String, String> headers) {
+    public void setSrc(final Uri uri, final long startTimeMs, final long endTimeMs, final String extension, Map<String, String> headers, final long defaultCurrentTimeMs) {
         if (uri != null) {
             boolean isSourceEqual = uri.equals(srcUri) && startTimeMs == this.startTimeMs && endTimeMs == this.endTimeMs;
+
+            if (srcUri == null && player != null) {
+                exoPlayerView.updateSurfaceView();
+                player.play();
+            }
+
             hasDrmFailed = false;
             this.srcUri = uri;
             this.startTimeMs = startTimeMs;
             this.endTimeMs = endTimeMs;
+            this.defaultCurrentTimeMs = defaultCurrentTimeMs;
             this.extension = extension;
             this.requestHeaders = headers;
             this.mediaDataSourceFactory =
@@ -1509,6 +1678,12 @@ class ReactExoplayerView extends FrameLayout implements
                             this.requestHeaders);
 
             if (!isSourceEqual) {
+                analyticsMeta = null;
+                if (youboraPlugin != null) {
+                    youboraPlugin.getAdapter().unregisterListeners();
+                    youboraPlugin.getAdapter().fireStop();
+                    youboraPlugin = null;
+                }
                 reloadSource();
             }
         }
@@ -1516,7 +1691,10 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void clearSrc() {
         if (srcUri != null) {
-            player.stop();
+            exoPlayerView.clearVideoView();
+            if (player != null) {
+                player.stop(true);
+            }
             player.clearMediaItems();
             this.srcUri = null;
             this.startTimeMs = -1;
@@ -1530,6 +1708,9 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setProgressUpdateInterval(final float progressUpdateInterval) {
         mProgressUpdateInterval = progressUpdateInterval;
+        progressHandler.removeCallbacksAndMessages(null);
+        Message msg = Message.obtain(progressHandler, SHOW_PROGRESS);
+        progressHandler.sendMessageDelayed(msg, Math.round(mProgressUpdateInterval));
     }
 
     public void setReportBandwidth(boolean reportBandwidth) {
@@ -2022,6 +2203,30 @@ class ReactExoplayerView extends FrameLayout implements
         this.drmLicenseHeader = header;
     }
 
+    public void setAnalyticsMeta(ReadableMap analyticsData) {
+        this.analyticsMeta = analyticsData;
+        if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
+            initialiseYoubora();
+        }
+        if (player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
+            youboraPlugin.getAdapter().unregisterListeners();
+            youboraPlugin.getAdapter().fireStop();
+            youboraPlugin = null;
+            initialiseYoubora();
+        }
+    }
+
+    public void setAssetId(String assetId) {
+        this.assetId = assetId;
+    }
+
+    public void setLicencePersistingEnabled(boolean isEnabled) {
+        this.licencePersistingEnabled = isEnabled;
+    }
+
+    public void setLicenceMultiSessionEnabled(boolean isEnabled) {
+        this.licenceMultiSessionEnabled = isEnabled;
+    }
 
     @Override
     public void onDrmKeysLoaded(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
@@ -2062,8 +2267,78 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    @SuppressLint("CheckResult")
+    private void cacheLicense() {
+        if (licencePersistingEnabled) {
+            Map<String, String> existingLicense = LicencesDataStore.getCachedLicence(assetId);
+            boolean licenceServerChanged = existingLicense != null && !drmLicenseUrl.equals(existingLicense.get(LicencesDataStore.LICENCE_URL));
+            if (existingLicense == null || playerNeedsNewLicence || licenceServerChanged) {
+                Single.fromCallable(() -> {
+                            try {
+                                HttpDataSource httpDataSource = httpDataSourceFactory.createDataSource();
+                                DashManifest dashManifest = DashUtil.loadManifest(httpDataSource, srcUri);
+                                Format drmInitDataFormat = DashUtil.loadFormatWithDrmInitData(httpDataSource, dashManifest.getPeriod(0));
+                                OfflineLicenseHelper offlineLicenseHelper = OfflineLicenseHelper
+                                        .newWidevineInstance(drmLicenseUrl, true, httpDataSourceFactory, new DrmSessionEventListener.EventDispatcher());
+
+                                if (assetId != null && !"".equals(assetId) && drmInitDataFormat != null) {
+                                    byte[] key = offlineLicenseHelper.downloadLicense(drmInitDataFormat);
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                                        Pair<Long, Long> licenseDuration = offlineLicenseHelper.getLicenseDurationRemainingSec(key);
+                                    }
+                                    return key;
+                                }
+                                return null;
+
+                            } catch (Exception e) {
+                                Log.i("DRM LICENCE CACHING", "Failed to acquire offline license", e);
+                            }
+
+                            return null;
+                        }).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread()).subscribe(new DisposableSingleObserver<byte[]>() {
+                            @Override
+                            public void onSuccess(byte[] license) {
+                                LicencesDataStore.storeLicense(assetId, drmLicenseUrl, license);
+                                playerNeedsNewLicence = false;
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                Log.i("DRM LICENCE CACHING", "Failed to acquire offline license", e);
+                                if (existingLicense != null) {
+                                    LicencesDataStore.removeLicence(assetId);
+                                }
+                            }
+                        });
+            }
+        }
+    }
+
     public void setSubtitleStyle(SubtitleStyle style) {
         exoPlayerView.setSubtitleStyle(style);
+    }
+
+    public void fastForwardOrRewind(long incrementMs, long lastPosition) {
+        mainHandler.removeCallbacksAndMessages(null);
+        if (player == null || incrementMs == 1000L) {
+            return;
+        }
+
+        long currentPosition = lastPosition;
+        if (currentPosition < 0) {
+            currentPosition = player.getCurrentPosition();
+        }
+        long newPosition = currentPosition + incrementMs;
+
+        // Ensure newPosition is within valid range
+        long mediaDuration = player.getDuration();
+        newPosition = Math.max(0, Math.min(newPosition, mediaDuration));
+        seekTo(newPosition);
+        final long lastSeekPosition = newPosition;
+        if (newPosition > 0 && newPosition < mediaDuration) {
+            mainHandler.postDelayed(() -> fastForwardOrRewind(incrementMs, lastSeekPosition), 1000);
+        }
     }
 
     public void setShutterColor(Integer color) {
