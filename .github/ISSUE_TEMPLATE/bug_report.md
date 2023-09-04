@@ -10,36 +10,24 @@ assignees: ''
 # Bug
 
 <!--
-  Please provide a clear and concise description of what the bug is.
-  Include screenshots if needed.
-  Please test using the latest release of the library, as maybe said bug has been already fixed.
-  If the library has multiple install methods, describe installation method (e.g., pod, not pod, with jetifier etc)
+Very important, before opening a ticket:
+    1) Ensure the issue has not been already reported
+    2) lease test using the latest release (including 6.0.0 preRelease) of the library, as maybe the bug has been already fixed.
+    3) please don't use emulator to reproduce issues. if you have strange or sporadic error check if this is not devices specific (understand that this library is just a binding to player).
+    4) ensure you cannot solve the issue by yourself using following guide: https://github.com/react-native-video/react-native-video/blob/master/docs/DEBUGGING.md
 -->
 
 ## Platform
-<!--
-  Platform where your bug is happening. If Android, report if using Android or Android Exoplayer
--->
 Which player are you experiencing the problem on:
 * iOS
-* Android ExoPlayer
-* Android MediaPlayer
-* Windows UWP
-* Windows WPF
+* Android
+* Windows
 
 ## Environment info
 
-<!--
-  Run `react-native info` in your terminal and copy the results here. Also, include the *precise* version number of this library that you are using in the project
--->
-
-React native info output:
-
-```bash
- // paste it here
-```
-
+<!-- This fields are mandatory -->
 Library version: x.x.x
+Device: 
 
 ## Steps To Reproduce
 
