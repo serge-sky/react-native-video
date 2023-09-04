@@ -294,7 +294,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @ReactProp(name = PROP_AUDIO_OUTPUT)
     public void setAudioOutput(final ReactExoplayerView videoView, final String audioOutput) {
-        videoView.setAudioOutput(ReactExoplayerView.AudioOutput.get(audioOutput));
+        videoView.setAudioOutput(AudioOutput.get(audioOutput));
     }
 
     @ReactProp(name = PROP_VOLUME, defaultFloat = 1.0f)

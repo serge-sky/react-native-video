@@ -8,7 +8,7 @@ public enum AudioOutput {
     SPEAKER("speaker", C.STREAM_TYPE_MUSIC),
     EARPIECE("earpiece", C.STREAM_TYPE_VOICE_CALL);
 
-    private final int streamType;
+    public final int streamType;
     private final String mName;
 
     AudioOutput(final String name, int stream) {
