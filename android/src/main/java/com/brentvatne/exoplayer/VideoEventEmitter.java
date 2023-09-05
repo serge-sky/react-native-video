@@ -225,6 +225,7 @@ class VideoEventEmitter {
                 textTrack.putString("type", format.m_mimeType != null ? format.m_mimeType : "");
                 textTrack.putString("language", format.m_language != null ? format.m_language : "");
                 textTrack.putBoolean("selected", format.m_isSelected);
+                textTrack.putString("label", format.m_label != null ? format.m_label: "");
                 waTextTracks.pushMap(textTrack);
             }
         }

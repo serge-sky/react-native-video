@@ -1508,6 +1508,7 @@ class ReactExoplayerView extends FrameLayout implements
             textTrack.m_mimeType = format.sampleMimeType;
             textTrack.m_language = format.language != null ? format.language : "";
             textTrack.m_isSelected = isTrackSelected(selection, group, 0 );
+            textTrack.m_label = format.label != null ? format.label: "";
             textTracks.add(textTrack);
         }
         return textTracks;

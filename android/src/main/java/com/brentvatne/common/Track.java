@@ -10,4 +10,5 @@ public class Track
     public boolean m_isSelected;
     public int m_bitrate;
     public int m_index;
+    public String m_label;
 }
