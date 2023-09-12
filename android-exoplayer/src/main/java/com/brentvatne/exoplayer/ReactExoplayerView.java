@@ -169,6 +169,7 @@ class ReactExoplayerView extends FrameLayout implements
     private Dynamic textTrackValue;
     private ReadableArray textTracks;
     private boolean disableFocus;
+    private boolean focusable = true;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
     private float mProgressUpdateInterval = 250.0f;
     private boolean playInBackground = false;
@@ -258,6 +259,7 @@ class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.setLayoutParams(layoutParams);
 
         addView(exoPlayerView, 0, layoutParams);
+        exoPlayerView.setFocusable(this.focusable);
 
         mainHandler = new Handler();
     }
@@ -856,6 +858,11 @@ class ReactExoplayerView extends FrameLayout implements
                 AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
         return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
+    public void setFocusable(boolean focusable) {
+        this.focusable = focusable;
+        exoPlayerView.setFocusable(this.focusable);
     }
 
     private void setPlayWhenReady(boolean playWhenReady) {
