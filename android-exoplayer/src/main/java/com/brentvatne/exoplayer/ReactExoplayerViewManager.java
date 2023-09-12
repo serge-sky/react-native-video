@@ -67,6 +67,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_MAXIMUM_BIT_RATE = "maxBitRate";
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
+    private static final String PROP_FOCUSABLE = "focusable";
     private static final String PROP_FULLSCREEN = "fullscreen";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
     private static final String PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack";
@@ -375,6 +376,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_FF_RW)
     public void fastForwardOrRewind(final ReactExoplayerView videoView, final String incrementMs) {
         videoView.fastForwardOrRewind(Long.parseLong(incrementMs), -1L);
+    }
+
+    @ReactProp(name = PROP_FOCUSABLE, defaultBoolean = true)
+    public void setFocusable(final ReactExoplayerView videoView, final boolean focusable) {
+        videoView.setFocusable(focusable);
     }
 
     private boolean startsWithValidScheme(String uriString) {
