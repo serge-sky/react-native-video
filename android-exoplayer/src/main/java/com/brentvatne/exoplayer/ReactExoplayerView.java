@@ -1211,15 +1211,18 @@ class ReactExoplayerView extends FrameLayout implements
                             decoderInitializationException.codecInfo.name);
                 }
             }
+            Log.d("SkyTVPlayer", "TYPE_RENDERER");
         } else if (e.type == ExoPlaybackException.TYPE_SOURCE) {
             errorString = getResources().getString(R.string.unrecognized_media_format);
+            Log.d("SkyTVPlayer", "TYPE_SOURCE");
         }
         eventEmitter.error(errorString, ex);
         playerNeedsSource = true;
         playerNeedsNewLicence = true;
-        if (isBehindLiveWindow(e)) {
+        if (isBehindLiveWindow(e) || e.type == ExoPlaybackException.TYPE_RENDERER) {
             clearResumePosition();
             initializePlayer();
+            Log.d("SkyTVPlayer", "Restart Player");
         } else {
             updateResumePosition();
         }
