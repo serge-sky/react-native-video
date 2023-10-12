@@ -1,26 +1,154 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+buildscript {
+    def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNSAC_kotlinVersion']
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+    }
+}
 
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
 }
 
+def getExtOrDefault(name, defaultValue) {
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : defaultValue
+}
+
+def isNewArchitectureEnabled() {
+    // To opt-in for the New Architecture, you can either:
+    // - Set `newArchEnabled` to true inside the `gradle.properties` file
+    // - Invoke gradle with `-newArchEnabled=true`
+    // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
+    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
+}
+
+def useExoplayerIMA = safeExtGet("RNVUseExoplayerIMA", false)
+
+println "useExoplayerIMA:" + useExoplayerIMA
+
+// This string is used to define build path.
+// As react native build output directory is react-native path of the module.
+// We need to force a new path on each configuration change.
+// If you add a new build parameter, please add the new value in this string
+def configStringPath = (
+        'useExoplayerIMA' + useExoplayerIMA \
+).md5()
+
+if (isNewArchitectureEnabled()) {
+    apply plugin: "com.facebook.react"
+}
+
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 28)
-    buildToolsVersion safeExtGet('buildToolsVersion', '28.0.3')
+    namespace 'com.brentvatne.react'
+    compileSdkVersion safeExtGet('compileSdkVersion', 31)
+    buildToolsVersion safeExtGet('buildToolsVersion', '30.0.2')
+
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 16)
+        minSdkVersion safeExtGet('minSdkVersion', 21)
         targetSdkVersion safeExtGet('targetSdkVersion', 28)
         versionCode 1
         versionName "1.0"
+        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
+
         ndk {
-            abiFilters "armeabi-v7a", "x86"
+            abiFilters(*reactNativeArchitectures())
+        }
+    }
+
+    packagingOptions {
+        exclude "**/libreact_render*.so"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildDir 'buildOutput_' + configStringPath
+
+    sourceSets {
+        main {
+            java {
+                if (useExoplayerIMA) {
+                    exclude 'com/google/ads/interactivemedia/v3/api'
+                    exclude 'com/google/android/exoplayer2/ext/ima'
+                }
+            }
+        }
+    }
+
+    sourceSets.main {
+        java {
+            if (isNewArchitectureEnabled()) {
+                srcDirs += [
+                    "src/fabric/java",
+                    "${project.buildDir}/generated/source/codegen/java"
+                ]
+            } else {
+                srcDirs += [
+                    "src/oldarch/java"
+                ]
+            }
         }
     }
 }
 
+def reactNativeArchitectures() {
+    def value = project.getProperties().get("reactNativeArchitectures")
+    return value ? value.split(",") : ["armeabi-v7a", "x86", "x86_64", "arm64-v8a"]
+}
+
+repositories {
+    google()
+    maven {
+        // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+        url "$rootDir/../node_modules/react-native/android"
+    }
+    mavenCentral()
+}
+
+def kotlin_version = getExtOrDefault('kotlinVersion', project.properties['RNSAC_kotlinVersion'])
+
 dependencies {
-    //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    implementation 'com.github.adityaxjha:Android-ScalableVideoView:10e7b4da8b'
+    implementation('com.google.android.exoplayer:exoplayer:2.18.1') {
+        exclude group: 'com.android.support'
+    }
+
+    // All support libs must use the same version
+    implementation "androidx.annotation:annotation:1.1.0"
+    implementation "androidx.core:core:1.1.0"
+    implementation "androidx.media:media:1.1.0"
+    implementation "androidx.activity:activity:1.4.0"
+
+    implementation "com.nicepeopleatwork:exoplayer-adapter:6.7.25"
+
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'androidx.datastore:datastore-preferences:1.0.0'
+    implementation 'androidx.datastore:datastore-preferences-rxjava3:1.0.0'
+    implementation 'com.google.code.gson:gson:2.7'
+
+    implementation('com.google.android.exoplayer:extension-okhttp:2.18.1') {
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+    }
+
+    if (useExoplayerIMA) {
+        implementation 'com.google.android.exoplayer:extension-ima:2.18.1'
+    }
+    implementation "com.squareup.okhttp3:okhttp:" + '$OKHTTP_VERSION'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
