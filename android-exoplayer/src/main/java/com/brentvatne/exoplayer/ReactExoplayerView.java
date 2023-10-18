@@ -530,7 +530,7 @@ class ReactExoplayerView extends FrameLayout implements
                     DefaultLoadControl defaultLoadControl = defaultLoadControlBuilder.createDefaultLoadControl();
                     DefaultRenderersFactory renderersFactory =
                             new DefaultRenderersFactory(getContext())
-                                    .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+                                    .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF).setEnableDecoderFallback(true);
 
                     player = new SimpleExoPlayer.Builder(getContext(), renderersFactory)
                             .setTrackSelector​(trackSelector)
@@ -1144,7 +1144,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
         eventEmitter.error(errorString, ex);
         playerNeedsSource = true;
-        if (isBehindLiveWindow(e)) {
+        if (isBehindLiveWindow(e) || e.type == ExoPlaybackException.TYPE_RENDERER) {
             clearResumePosition();
             initializePlayer();
         } else {
