@@ -1144,7 +1144,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
         eventEmitter.error(errorString, ex);
         playerNeedsSource = true;
-        if (isBehindLiveWindow(e) || e.type == ExoPlaybackException.TYPE_RENDERER) {
+        if (isBehindLiveWindow(e)) {
             clearResumePosition();
             initializePlayer();
         } else {
