@@ -253,7 +253,9 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        initializePlayer();
+        if(player == null){
+                initializePlayer();
+        }
     }
 
     @Override
