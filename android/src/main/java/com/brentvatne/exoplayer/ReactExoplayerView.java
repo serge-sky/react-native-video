@@ -632,51 +632,6 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    private class RNVLoadControl extends DefaultLoadControl {
-        private int availableHeapInBytes = 0;
-        private Runtime runtime;
-        public RNVLoadControl(DefaultAllocator allocator, int minBufferMs, int maxBufferMs, int bufferForPlaybackMs, int bufferForPlaybackAfterRebufferMs, int targetBufferBytes, boolean prioritizeTimeOverSizeThresholds, int backBufferDurationMs, boolean retainBackBufferFromKeyframe) {
-            super(allocator,
-                    minBufferMs,
-                    maxBufferMs,
-                    bufferForPlaybackMs,
-                    bufferForPlaybackAfterRebufferMs,
-                    targetBufferBytes,
-                    prioritizeTimeOverSizeThresholds,
-                    backBufferDurationMs,
-                    retainBackBufferFromKeyframe);
-            runtime = Runtime.getRuntime();
-            ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(themedReactContext.ACTIVITY_SERVICE);
-            availableHeapInBytes = (int) Math.floor(activityManager.getMemoryClass() * maxHeapAllocationPercent * 1024 * 1024);
-        }
-
-        @Override
-        public boolean shouldContinueLoading(long playbackPositionUs, long bufferedDurationUs, float playbackSpeed) {
-            if (ReactExoplayerView.this.disableBuffering) {
-                return false;
-            }
-            int loadedBytes = getAllocator().getTotalBytesAllocated();
-            boolean isHeapReached = availableHeapInBytes > 0 && loadedBytes >= availableHeapInBytes;
-            if (isHeapReached) {
-                return false;
-            }
-            long usedMemory = runtime.totalMemory() - runtime.freeMemory();
-            long freeMemory = runtime.maxMemory() - usedMemory;
-            long reserveMemory = (long)minBufferMemoryReservePercent * runtime.maxMemory();
-            long bufferedMs = bufferedDurationUs / (long)1000;
-            if (reserveMemory > freeMemory && bufferedMs > 2000) {
-                // We don't have enough memory in reserve so we stop buffering to allow other components to use it instead
-                return false;
-            }
-            if (runtime.freeMemory() == 0) {
-                Log.w("ExoPlayer Warning", "Free memory reached 0, forcing garbage collection");
-                runtime.gc();
-                return false;
-            }
-            return super.shouldContinueLoading(playbackPositionUs, bufferedDurationUs, playbackSpeed);
-        }
-    }
-
     private void startBufferCheckTimer() {
         Player player = this.player;
         VideoEventEmitter eventEmitter = this.eventEmitter;
@@ -758,17 +713,12 @@ class ReactExoplayerView extends FrameLayout implements
                 .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
         DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-        RNVLoadControl loadControl = new RNVLoadControl(
-                allocator,
-                minBufferMs,
-                maxBufferMs,
-                bufferForPlaybackMs,
-                bufferForPlaybackAfterRebufferMs,
-                -1,
-                true,
-                backBufferDurationMs,
-                DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME
-        );
+        DefaultLoadControl.Builder defaultLoadControlBuilder = new DefaultLoadControl.Builder();
+        defaultLoadControlBuilder.setAllocator(allocator);
+        defaultLoadControlBuilder.setBufferDurationsMs(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs);
+        defaultLoadControlBuilder.setTargetBufferBytes(-1);
+        defaultLoadControlBuilder.setPrioritizeTimeOverSizeThresholds(true);
+        DefaultLoadControl defaultLoadControl = defaultLoadControlBuilder.createDefaultLoadControl();
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF).setEnableDecoderFallback(true);
@@ -782,7 +732,7 @@ class ReactExoplayerView extends FrameLayout implements
         player = new ExoPlayer.Builder(getContext(), renderersFactory)
                     .setTrackSelector(self.trackSelector)
                     .setBandwidthMeter(bandwidthMeter)
-                    .setLoadControl(loadControl)
+                    .setLoadControl(defaultLoadControl)
                     .setSeekParameters(SeekParameters.CLOSEST_SYNC)
                     .setMediaSourceFactory(mediaSourceFactory)
                     .build();
@@ -2080,17 +2030,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setBackBufferDurationMs(int backBufferDurationMs) {
-        Runtime runtime = Runtime.getRuntime();
-        long usedMemory = runtime.totalMemory() - runtime.freeMemory();
-        long freeMemory = runtime.maxMemory() - usedMemory;
-        long reserveMemory = (long)minBackBufferMemoryReservePercent * runtime.maxMemory();
-        if (reserveMemory > freeMemory) {
-            // We don't have enough memory in reserve so we will
-            Log.w("ExoPlayer Warning", "Not enough reserve memory, setting back buffer to 0ms to reduce memory pressure!");
-            this.backBufferDurationMs = 0;
-            return;
-        }
-        this.backBufferDurationMs = backBufferDurationMs;
+
     }
 
     public void setContentStartTime(int contentStartTime) {
