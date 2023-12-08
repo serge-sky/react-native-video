@@ -49,7 +49,7 @@ export type Filter =
   | 'CIPhotoEffectTransfer'
   | 'CISepiaTone';
 
-export type DrmType = 'widevine' | 'playready' | 'clearkey' | 'fairplay';
+export type DRMType = 'widevine' | 'playready' | 'clearkey' | 'fairplay';
 
 type DebugConfig = Readonly<{
   enable?: boolean;
@@ -57,7 +57,7 @@ type DebugConfig = Readonly<{
 }>;
 
 type Drm = Readonly<{
-  type?: DrmType;
+  type?: DRMType;
   licenseServer?: string;
   headers?: Headers;
   contentId?: string; // ios
