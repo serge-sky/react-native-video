@@ -89,6 +89,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_LICENCE_PERSISTENCE_ENABLED = "licencePersistenceEnabled";
     private static final String PROP_LICENCE_MULTI_SESSION_ENABLED = "licenceMultiSessionEnabled";
     private static final String PROP_FF_RW = "fastForwardOrRewind";
+    private static final String PROP_CLEAR_SUBTITLE = "clearSubtitle";
 
     private ReactExoplayerConfig config;
 
@@ -449,6 +450,13 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_FF_RW)
     public void fastForwardOrRewind(final ReactExoplayerView videoView, final String incrementMs) {
         videoView.fastForwardOrRewind(Long.parseLong(incrementMs), -1L);
+    }
+
+    @ReactProp(name = PROP_CLEAR_SUBTITLE, defaultBoolean = false)
+    public void clearSubtitle(final ReactExoplayerView videoView, final boolean clearSubtitle) {
+        if(clearSubtitle) {
+            videoView.clearSubtitle();
+        }
     }
 
     private boolean startsWithValidScheme(String uriString) {
