@@ -375,7 +375,9 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
     }
 
     public void clearSubtitle() {
+        Log.d("ExoPlayerView", "clearSubtitle1");
         if (subtitleLayout != null) {
+            Log.d("ExoPlayerView", "clearSubtitle2");
             subtitleLayout.setCues(new ArrayList<>());
         }
     }

@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
@@ -166,6 +167,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         String assetId = src.hasKey(PROP_SRC_ASSET_ID) ? src.getString(PROP_SRC_ASSET_ID) : null;
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
 
+        Log.d("ReactExoplayerViewManager", "clearSubtitle");
         videoView.clearSubtitle();
 
         if (TextUtils.isEmpty(uriString)) {
