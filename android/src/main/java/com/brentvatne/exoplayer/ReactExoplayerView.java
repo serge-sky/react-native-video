@@ -2301,4 +2301,8 @@ class ReactExoplayerView extends FrameLayout implements
     public void onAdEvent(AdEvent adEvent) {
         eventEmitter.receiveAdEvent(adEvent.getType().name());
     }
+
+    public void clearSubtitle() {
+        exoPlayerView.clearSubtitle();
+    }
 }
