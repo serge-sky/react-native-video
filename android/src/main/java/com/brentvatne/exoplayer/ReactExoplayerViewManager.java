@@ -89,6 +89,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_LICENCE_PERSISTENCE_ENABLED = "licencePersistenceEnabled";
     private static final String PROP_LICENCE_MULTI_SESSION_ENABLED = "licenceMultiSessionEnabled";
     private static final String PROP_FF_RW = "fastForwardOrRewind";
+    private static final String PROP_CLEAR_SUBTITLE_VIEW = "clearSubtitleView";
 
     private ReactExoplayerConfig config;
 
@@ -165,8 +166,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
         String assetId = src.hasKey(PROP_SRC_ASSET_ID) ? src.getString(PROP_SRC_ASSET_ID) : null;
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
-
-        videoView.clearSubtitle();
 
         if (TextUtils.isEmpty(uriString)) {
             videoView.clearSrc();
@@ -451,6 +450,13 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_FF_RW)
     public void fastForwardOrRewind(final ReactExoplayerView videoView, final String incrementMs) {
         videoView.fastForwardOrRewind(Long.parseLong(incrementMs), -1L);
+    }
+
+    @ReactProp(name = PROP_CLEAR_SUBTITLE_VIEW, defaultBoolean = false)
+    public void clearSubtitleView(final ReactExoplayerView videoView, final boolean clearSubtitleView) {
+        if(clearSubtitleView) {
+            videoView.clearSubtitle();
+        }
     }
 
     private boolean startsWithValidScheme(String uriString) {
