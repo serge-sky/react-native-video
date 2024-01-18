@@ -997,6 +997,7 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     private void releasePlayer() {
+        clearSubtitle();
         if (player != null) {
             if (adsLoader != null) {
                 adsLoader.setPlayer(null);
