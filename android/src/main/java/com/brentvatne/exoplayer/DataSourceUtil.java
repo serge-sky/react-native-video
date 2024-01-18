@@ -51,6 +51,15 @@ public class DataSourceUtil {
 
     public static DataSource.Factory getDefaultDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
         if (defaultDataSourceFactory == null || (requestHeaders != null && !requestHeaders.isEmpty())) {
+            if (requestHeaders != null) {
+                for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
+                    if (entry.getKey().toLowerCase().equals("user-agent") && !entry.getValue().isEmpty()) {
+                        setUserAgent(entry.getValue());
+                        requestHeaders.remove(entry.getKey());
+                    }
+                }
+            }
+            
             defaultDataSourceFactory = buildDataSourceFactory(context, bandwidthMeter, requestHeaders);
         }
         return defaultDataSourceFactory;
