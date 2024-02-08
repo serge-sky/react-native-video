@@ -1631,7 +1631,7 @@ class ReactExoplayerView extends FrameLayout implements
 
             if (!isSourceEqual) {
                 analyticsMeta = null;
-                if (youboraPlugin != null) {
+                if (!uri.equals(srcUri) && youboraPlugin != null) {
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
@@ -1654,6 +1654,11 @@ class ReactExoplayerView extends FrameLayout implements
             this.extension = null;
             this.requestHeaders = null;
             this.mediaDataSourceFactory = null;
+            if (youboraPlugin != null) {
+               youboraPlugin.getAdapter().unregisterListeners();
+               youboraPlugin.getAdapter().fireStop();
+               youboraPlugin = null;
+           }
             clearResumePosition();
         }
     }
