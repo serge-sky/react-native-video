@@ -530,9 +530,7 @@ class ReactExoplayerView extends FrameLayout implements
     private void initialiseYoubora() {
         if (analyticsMeta == null) return;
 
-        if (BuildConfig.DEBUG) {
-            YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
-        }
+        YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
 
         contentId = analyticsMeta.getString("contentId");
 
@@ -2159,12 +2157,14 @@ class ReactExoplayerView extends FrameLayout implements
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
         if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
+            Log.d("Youboraaaaaaaa", "initialised");
             initialiseYoubora();
         }
         if (player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
             youboraPlugin.getAdapter().unregisterListeners();
             youboraPlugin.getAdapter().fireStop();
             youboraPlugin = null;
+            Log.d("Youboraaaaaaaa", "was it stopped by any chance");
             initialiseYoubora();
         }
     }
