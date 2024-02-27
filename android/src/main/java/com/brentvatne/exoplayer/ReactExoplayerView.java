@@ -1007,6 +1007,7 @@ class ReactExoplayerView extends FrameLayout implements
             player = null;
             if (youboraPlugin != null) {
                 Log.d("Youboraaaaaaaa", "was it stopped inside releasePlayer");
+                youboraPlugin.getAdapter().fireStart();
                 // youboraPlugin.getAdapter().fireStop();
             }
         }
@@ -1126,6 +1127,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private void stopPlayback() {
         onStopPlayback();
+        Log.d("Youboraaaaa","releasePlayer was called inside stopPlayback");
         releasePlayer();
     }
 
@@ -2021,6 +2023,7 @@ class ReactExoplayerView extends FrameLayout implements
     public void setMinLoadRetryCountModifier(int newMinLoadRetryCount) {
         minLoadRetryCount = newMinLoadRetryCount;
         releasePlayer();
+        Log.d("Youboraaaaa","releasePlayer was called inside setMinLoadRetryCountModifier");
         initializePlayer();
     }
 
@@ -2149,6 +2152,7 @@ class ReactExoplayerView extends FrameLayout implements
         minBackBufferMemoryReservePercent = newMinBackBufferMemoryReservePercent;
         minBufferMemoryReservePercent = newMinBufferMemoryReservePercent;
         releasePlayer();
+        Log.d("Youboraaaaa","releasePlayer was called inside setBufferConfig");
         initializePlayer();
     }
 
