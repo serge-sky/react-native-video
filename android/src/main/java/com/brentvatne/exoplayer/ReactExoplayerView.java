@@ -1006,6 +1006,7 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
             if (youboraPlugin != null) {
+                Log.d("Youboraaaaaaaa", "was it stopped by any chance");
                 youboraPlugin.getAdapter().fireStop();
             }
         }
@@ -1632,6 +1633,7 @@ class ReactExoplayerView extends FrameLayout implements
                 analyticsMeta = null;
                 if (youboraPlugin != null) {
                     youboraPlugin.getAdapter().unregisterListeners();
+                    Log.d("Youboraaaaaaaa", "was it stopped by any chance");
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
                 }
