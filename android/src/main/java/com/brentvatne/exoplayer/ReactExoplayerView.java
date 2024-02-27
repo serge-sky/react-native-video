@@ -1006,7 +1006,7 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
             if (youboraPlugin != null) {
-                Log.d("Youboraaaaaaaa", "was it stopped by any chance");
+                Log.d("Youboraaaaaaaa", "was it stopped by any chance333333");
                 youboraPlugin.getAdapter().fireStop();
             }
         }
@@ -1633,7 +1633,7 @@ class ReactExoplayerView extends FrameLayout implements
                 analyticsMeta = null;
                 if (youboraPlugin != null) {
                     youboraPlugin.getAdapter().unregisterListeners();
-                    Log.d("Youboraaaaaaaa", "was it stopped by any chance");
+                    Log.d("Youboraaaaaaaa", "was it stopped by any chance1111111");
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
                 }
@@ -2166,7 +2166,7 @@ class ReactExoplayerView extends FrameLayout implements
             youboraPlugin.getAdapter().unregisterListeners();
             youboraPlugin.getAdapter().fireStop();
             youboraPlugin = null;
-            Log.d("Youboraaaaaaaa", "was it stopped by any chance");
+            Log.d("Youboraaaaaaaa", "was it stopped by any chance0000000");
             initialiseYoubora();
         }
     }
