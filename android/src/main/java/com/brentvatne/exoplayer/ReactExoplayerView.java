@@ -1006,8 +1006,8 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
             if (youboraPlugin != null) {
-                Log.d("Youboraaaaaaaa", "was it stopped by any chance333333");
-                youboraPlugin.getAdapter().fireStop();
+                Log.d("Youboraaaaaaaa", "was it stopped inside releasePlayer");
+                // youboraPlugin.getAdapter().fireStop();
             }
         }
         if (adsLoader != null) {
@@ -1631,9 +1631,10 @@ class ReactExoplayerView extends FrameLayout implements
 
             if (!isSourceEqual) {
                 analyticsMeta = null;
-                if (youboraPlugin != null) {
+                Log.d("Youboraaaaaaaa", "srcUri: "+srcUri+" uri: "+ uri);
+                if (!uri.equals(srcUri) && youboraPlugin != null) {
                     youboraPlugin.getAdapter().unregisterListeners();
-                    Log.d("Youboraaaaaaaa", "was it stopped by any chance1111111");
+                    Log.d("Youboraaaaaaaa", "was it stopped inside setSrc");
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
                 }
@@ -1655,6 +1656,12 @@ class ReactExoplayerView extends FrameLayout implements
             this.extension = null;
             this.requestHeaders = null;
             this.mediaDataSourceFactory = null;
+            if (youboraPlugin != null) {
+                youboraPlugin.getAdapter().unregisterListeners();
+                youboraPlugin.getAdapter().fireStop();
+                Log.d("Youboraaaaaaaa", "was it stopped inside clearSrc");
+                youboraPlugin = null;
+            }
             clearResumePosition();
         }
     }
@@ -2031,17 +2038,18 @@ class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setBackBufferDurationMs(int backBufferDurationMs) {
-        Runtime runtime = Runtime.getRuntime();
-        long usedMemory = runtime.totalMemory() - runtime.freeMemory();
-        long freeMemory = runtime.maxMemory() - usedMemory;
-        long reserveMemory = (long)minBackBufferMemoryReservePercent * runtime.maxMemory();
-        if (reserveMemory > freeMemory) {
-            // We don't have enough memory in reserve so we will
-            Log.w("ExoPlayer Warning", "Not enough reserve memory, setting back buffer to 0ms to reduce memory pressure!");
-            this.backBufferDurationMs = 0;
-            return;
-        }
-        this.backBufferDurationMs = backBufferDurationMs;
+        Log.d("Youboraaaaaa", "setBackBufferDurationMs is called?")
+        // Runtime runtime = Runtime.getRuntime();
+        // long usedMemory = runtime.totalMemory() - runtime.freeMemory();
+        // long freeMemory = runtime.maxMemory() - usedMemory;
+        // long reserveMemory = (long)minBackBufferMemoryReservePercent * runtime.maxMemory();
+        // if (reserveMemory > freeMemory) {
+        //     // We don't have enough memory in reserve so we will
+        //     Log.w("ExoPlayer Warning", "Not enough reserve memory, setting back buffer to 0ms to reduce memory pressure!");
+        //     this.backBufferDurationMs = 0;
+        //     return;
+        // }
+        // this.backBufferDurationMs = backBufferDurationMs;
     }
 
     public void setContentStartTime(int contentStartTime) {
