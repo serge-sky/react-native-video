@@ -830,6 +830,11 @@ class ReactExoplayerView extends FrameLayout implements
         eventEmitter.loadStart();
         loadVideoStarted = true;
 
+        Log.d("Youboraaaaa", "analyticsMeta after player prepare: "+analyticsMeta);
+
+        if (analyticsMeta != null) {
+            initialiseYoubora();
+        }
         finishPlayerInitialization();
     }
 
