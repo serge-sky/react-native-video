@@ -834,7 +834,11 @@ class ReactExoplayerView extends FrameLayout implements
         applyModifiers();
         startBufferCheckTimer();
 
-        Log.d("Youboraaaaa","finishPlayerInitialization");
+        Log.d("Youboraaaaa","finishPlayerInitialization: "+player);
+        Log.d("Youboraaaaa","finishPlayerInitialization"+this.analyticsMeta);
+        Log.d("Youboraaaaa","finishPlayerInitialization"+youboraPlugin);
+        Log.d("Youboraaaaa","finishPlayerInitialization"+contentId);
+        Log.d("Youboraaaaa","finishPlayerInitialization"+this.analyticsMeta.getString("contentId"));
 
         if (player != null && this.analyticsMeta != null && youboraPlugin == null && contentId != this.analyticsMeta.getString("contentId")) {
             initialiseYoubora();
