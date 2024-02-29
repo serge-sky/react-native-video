@@ -835,7 +835,9 @@ class ReactExoplayerView extends FrameLayout implements
         startBufferCheckTimer();
 
         Log.d("Youboraaaaa","finishPlayerInitialization1: " + player);
-        Log.d("Youboraaaaa","finishPlayerInitialization2: " + analyticsMeta.toString());
+        if (analyticsMeta != null){
+        Log.d("Youboraaaaa","finishPlayerInitialization2: " + analyticsData.toString());
+        }
         Log.d("Youboraaaaa","finishPlayerInitialization3: " + youboraPlugin);
         Log.d("Youboraaaaa","finishPlayerInitialization4: " + contentId);
         // Log.d("Youboraaaaa","finishPlayerInitialization5: " + (analyticsMeta != null && analyticsMeta.getString("contentId")));
@@ -2166,7 +2168,9 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
+        if (analyticsMeta != null){
         Log.d("Youboraaaaa","setAnalyticsMeta: " + analyticsData.toString());
+        }
         // if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
         //     initialiseYoubora();
         // }
