@@ -838,7 +838,7 @@ class ReactExoplayerView extends FrameLayout implements
         Log.d("Youboraaaaa","finishPlayerInitialization player: " + player);
         if (analyticsMeta != null){
             Log.d("Youboraaaaa","finishPlayerInitialization analyticsMeta: " + analyticsMeta.toString());
-            Log.d("Youboraaaaa","finishPlayerInitialization check for contentId different: " + contentId != analyticsMeta.getString("contentId"));
+            Log.d("Youboraaaaa","finishPlayerInitialization check for contentId different: " + contentId + analyticsMeta.getString("contentId"));
         }
         Log.d("Youboraaaaa","finishPlayerInitialization youboraPlugin: " + youboraPlugin);
         Log.d("Youboraaaaa","finishPlayerInitialization contentId: " + contentId);
@@ -2173,7 +2173,7 @@ class ReactExoplayerView extends FrameLayout implements
         this.analyticsMeta = analyticsData;
         if (analyticsData != null){
             Log.d("Youboraaaaa","setAnalyticsMeta analyticsData: " + analyticsData.toString());
-            Log.d("Youboraaaaa","setAnalyticsMeta check for contentId different: " + contentId != analyticsMeta.getString("contentId"));
+            Log.d("Youboraaaaa","setAnalyticsMeta check for contentId different: " + contentId + analyticsMeta.getString("contentId"));
         }
 
         Log.d("Youboraaaaa","setAnalyticsMeta player: " + player);
