@@ -530,9 +530,7 @@ class ReactExoplayerView extends FrameLayout implements
     private void initialiseYoubora() {
         if (analyticsMeta == null) return;
 
-        if (BuildConfig.DEBUG) {
-            YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
-        }
+        YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
 
         contentId = analyticsMeta.getString("contentId");
 
@@ -748,9 +746,9 @@ class ReactExoplayerView extends FrameLayout implements
 
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
-        if (analyticsMeta != null) {
-            initialiseYoubora();
-        }
+        // if (analyticsMeta != null) {
+        //     initialiseYoubora();
+        // }
         changeAudioOutput(this.audioOutput);
     }
 
@@ -835,6 +833,12 @@ class ReactExoplayerView extends FrameLayout implements
         setControls(controls);
         applyModifiers();
         startBufferCheckTimer();
+
+        Log.d("Youboraaaaa","finishPlayerInitialization");
+
+        if (player != null && this.analyticsData != null && youboraPlugin == null && contentId != this.analyticsData.getString("contentId")) {
+            initialiseYoubora();
+        }
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
@@ -2158,15 +2162,15 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
-        if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
-            initialiseYoubora();
-        }
-        if (player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
-            youboraPlugin.getAdapter().unregisterListeners();
-            youboraPlugin.getAdapter().fireStop();
-            youboraPlugin = null;
-            initialiseYoubora();
-        }
+        // if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
+        //     initialiseYoubora();
+        // }
+        // if (player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
+        //     youboraPlugin.getAdapter().unregisterListeners();
+        //     youboraPlugin.getAdapter().fireStop();
+        //     youboraPlugin = null;
+        //     initialiseYoubora();
+        // }
     }
 
     public void setAssetId(String assetId) {
