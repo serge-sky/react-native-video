@@ -631,6 +631,8 @@ class ReactExoplayerView extends FrameLayout implements
             Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
             youboraPlugin.setAdapter(adapter);
             youboraPlugin.getAdapter().fireStart();
+            // Reset playerInitialised so that youbora detects it next time when we change channel
+            this.playerInitialised = false;
         }
     }
 
