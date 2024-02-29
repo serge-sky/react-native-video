@@ -836,7 +836,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         Log.d("Youboraaaaa","finishPlayerInitialization1: " + player);
         if (analyticsMeta != null){
-        Log.d("Youboraaaaa","finishPlayerInitialization2: " + analyticsData.toString());
+        Log.d("Youboraaaaa","finishPlayerInitialization2: " + analyticsMeta.toString());
         }
         Log.d("Youboraaaaa","finishPlayerInitialization3: " + youboraPlugin);
         Log.d("Youboraaaaa","finishPlayerInitialization4: " + contentId);
@@ -2168,7 +2168,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
-        if (analyticsMeta != null){
+        if (analyticsData != null){
         Log.d("Youboraaaaa","setAnalyticsMeta: " + analyticsData.toString());
         }
         // if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
