@@ -250,6 +250,7 @@ class ReactExoplayerView extends FrameLayout implements
     private long lastPos = -1;
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
+    private boolean playerInitialised = false;
 
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -836,11 +837,11 @@ class ReactExoplayerView extends FrameLayout implements
 
         Log.d("Youboraaaaa","finishPlayerInitialization1: " + player);
         if (analyticsMeta != null){
-        Log.d("Youboraaaaa","finishPlayerInitialization2: " + analyticsMeta.toString());
+            Log.d("Youboraaaaa","finishPlayerInitialization2: " + analyticsMeta.toString());
         }
         Log.d("Youboraaaaa","finishPlayerInitialization3: " + youboraPlugin);
         Log.d("Youboraaaaa","finishPlayerInitialization4: " + contentId);
-        // Log.d("Youboraaaaa","finishPlayerInitialization5: " + (analyticsMeta != null && analyticsMeta.getString("contentId")));
+        this.playerInitialised = true;
 
         if (player != null && youboraPlugin == null  && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
             initialiseYoubora();
@@ -2169,17 +2170,14 @@ class ReactExoplayerView extends FrameLayout implements
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
         if (analyticsData != null){
-        Log.d("Youboraaaaa","setAnalyticsMeta: " + analyticsData.toString());
+            Log.d("Youboraaaaa","setAnalyticsMeta: " + analyticsData.toString());
         }
-        // if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
-        //     initialiseYoubora();
-        // }
-        // if (player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
-        //     youboraPlugin.getAdapter().unregisterListeners();
-        //     youboraPlugin.getAdapter().fireStop();
-        //     youboraPlugin = null;
-        //     initialiseYoubora();
-        // }
+
+        Log.d("Youboraaaaa","playerInitialised: " + playerInitialised);
+
+        if (playerInitialised && player != null && youboraPlugin == null && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
+            initialiseYoubora();
+        }
     }
 
     public void setAssetId(String assetId) {
