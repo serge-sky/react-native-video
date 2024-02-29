@@ -1651,6 +1651,7 @@ class ReactExoplayerView extends FrameLayout implements
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
+                    contentId = null;
                 }
                 reloadSource();
             }
