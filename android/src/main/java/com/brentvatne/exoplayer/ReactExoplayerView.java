@@ -250,7 +250,7 @@ class ReactExoplayerView extends FrameLayout implements
     private long lastPos = -1;
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
-    private boolean playerInitialised = false;
+    // private boolean playerInitialised = false;
 
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -632,7 +632,7 @@ class ReactExoplayerView extends FrameLayout implements
             youboraPlugin.setAdapter(adapter);
             youboraPlugin.getAdapter().fireStart();
             // Reset playerInitialised so that youbora detects it next time when we change channel
-            this.playerInitialised = false;
+            // this.playerInitialised = false;
         }
     }
 
@@ -837,14 +837,14 @@ class ReactExoplayerView extends FrameLayout implements
         applyModifiers();
         startBufferCheckTimer();
 
-        Log.d("Youboraaaaa","finishPlayerInitialization player: " + player);
-        if (analyticsMeta != null){
-            Log.d("Youboraaaaa","finishPlayerInitialization analyticsMeta: " + analyticsMeta.toString());
-            Log.d("Youboraaaaa","finishPlayerInitialization check for contentId different: " + contentId + analyticsMeta.getString("contentId"));
-        }
-        Log.d("Youboraaaaa","finishPlayerInitialization youboraPlugin: " + youboraPlugin);
-        Log.d("Youboraaaaa","finishPlayerInitialization contentId: " + contentId);
-        this.playerInitialised = true;
+        // Log.d("Youboraaaaa","finishPlayerInitialization player: " + player);
+        // if (analyticsMeta != null){
+        //     Log.d("Youboraaaaa","finishPlayerInitialization analyticsMeta: " + analyticsMeta.toString());
+        //     Log.d("Youboraaaaa","finishPlayerInitialization check for contentId different: " + contentId + analyticsMeta.getString("contentId"));
+        // }
+        // Log.d("Youboraaaaa","finishPlayerInitialization youboraPlugin: " + youboraPlugin);
+        // Log.d("Youboraaaaa","finishPlayerInitialization contentId: " + contentId);
+        // this.playerInitialised = true;
 
         if (player != null && youboraPlugin == null && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
             Log.d("Youboraaaaa","Initialised youbora inside finishPlayerInitialization");
@@ -1652,6 +1652,7 @@ class ReactExoplayerView extends FrameLayout implements
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
                     contentId = null;
+                    analyticsMeta = null;
                 }
                 reloadSource();
             }
@@ -2174,19 +2175,19 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
-        if (analyticsData != null){
-            Log.d("Youboraaaaa","setAnalyticsMeta analyticsData: " + analyticsData.toString());
-            Log.d("Youboraaaaa","setAnalyticsMeta check for contentId different: " + contentId + analyticsMeta.getString("contentId"));
-        }
+        // if (analyticsData != null){
+        //     Log.d("Youboraaaaa","setAnalyticsMeta analyticsData: " + analyticsData.toString());
+        //     Log.d("Youboraaaaa","setAnalyticsMeta check for contentId different: " + contentId + analyticsMeta.getString("contentId"));
+        // }
 
-        Log.d("Youboraaaaa","setAnalyticsMeta player: " + player);
-        Log.d("Youboraaaaa","setAnalyticsMeta playerInitialised: " + playerInitialised);
-        Log.d("Youboraaaaa","setAnalyticsMeta youboraPlugin: " + youboraPlugin);
+        // Log.d("Youboraaaaa","setAnalyticsMeta player: " + player);
+        // Log.d("Youboraaaaa","setAnalyticsMeta playerInitialised: " + playerInitialised);
+        // Log.d("Youboraaaaa","setAnalyticsMeta youboraPlugin: " + youboraPlugin);
 
-        if (playerInitialised && player != null && youboraPlugin == null && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
-            Log.d("Youboraaaaa","Initialised youbora inside setAnalyticsMeta");
-            initialiseYoubora();
-        }
+        // if (playerInitialised && player != null && youboraPlugin == null && (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
+        //     Log.d("Youboraaaaa","Initialised youbora inside setAnalyticsMeta");
+        //     initialiseYoubora();
+        // }
     }
 
     public void setAssetId(String assetId) {
