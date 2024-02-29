@@ -836,7 +836,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         Log.d("Youboraaaaa","finishPlayerInitialization");
 
-        if (player != null && this.analyticsData != null && youboraPlugin == null && contentId != this.analyticsData.getString("contentId")) {
+        if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
             initialiseYoubora();
         }
     }
