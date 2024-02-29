@@ -835,7 +835,7 @@ class ReactExoplayerView extends FrameLayout implements
         startBufferCheckTimer();
 
         Log.d("Youboraaaaa","finishPlayerInitialization1: " + player);
-        Log.d("Youboraaaaa","finishPlayerInitialization2: " + analyticsMeta);
+        Log.d("Youboraaaaa","finishPlayerInitialization2: " + analyticsMeta.toString());
         Log.d("Youboraaaaa","finishPlayerInitialization3: " + youboraPlugin);
         Log.d("Youboraaaaa","finishPlayerInitialization4: " + contentId);
         // Log.d("Youboraaaaa","finishPlayerInitialization5: " + (analyticsMeta != null && analyticsMeta.getString("contentId")));
