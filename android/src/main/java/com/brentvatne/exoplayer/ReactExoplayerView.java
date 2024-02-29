@@ -1641,7 +1641,7 @@ class ReactExoplayerView extends FrameLayout implements
                             this.requestHeaders);
 
             if (!isSourceEqual) {
-                analyticsMeta = null;
+                Log.d("Youboraaaaaaa","isSourceEqual: "+isSourceEqual);
                 if (youboraPlugin != null) {
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
