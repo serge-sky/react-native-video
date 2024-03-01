@@ -250,7 +250,7 @@ class ReactExoplayerView extends FrameLayout implements
     private long lastPos = -1;
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
-    // private boolean playerInitialised = false;
+    private boolean triedYouboraInit = false;
 
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -628,6 +628,7 @@ class ReactExoplayerView extends FrameLayout implements
             Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
             youboraPlugin.setAdapter(adapter);
             youboraPlugin.getAdapter().fireStart();
+            this.triedYouboraInit=false;
             // Reset playerInitialised so that youbora detects it next time when we change channel
             // this.playerInitialised = false;
         }
@@ -834,8 +835,8 @@ class ReactExoplayerView extends FrameLayout implements
         applyModifiers();
         startBufferCheckTimer();
 
-
-        if (player != null && youboraPlugin == null && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
+        if (!triedYouboraInit && player != null && youboraPlugin == null && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
+            this.triedYouboraInit=true;
             initialiseYoubora();
         }
     }
@@ -2162,6 +2163,11 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
+
+        if (!triedYouboraInit && player != null && youboraPlugin == null && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
+            this.triedYouboraInit=true;
+            initialiseYoubora();
+        }
     }
 
     public void setAssetId(String assetId) {
