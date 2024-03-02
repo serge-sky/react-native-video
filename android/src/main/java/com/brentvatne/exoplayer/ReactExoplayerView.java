@@ -1001,7 +1001,11 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
             if (youboraPlugin != null) {
+                youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
+                youboraPlugin = null;
+                contentId = null;
+                analyticsMeta = null;
             }
         }
         if (adsLoader != null) {
