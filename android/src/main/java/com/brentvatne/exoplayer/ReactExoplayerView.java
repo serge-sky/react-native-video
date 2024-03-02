@@ -250,7 +250,6 @@ class ReactExoplayerView extends FrameLayout implements
     private long lastPos = -1;
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
-    private boolean triedYouboraInit = false;
 
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -619,7 +618,6 @@ class ReactExoplayerView extends FrameLayout implements
             Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
             youboraPlugin.setAdapter(adapter);
             youboraPlugin.getAdapter().fireStart();
-            this.triedYouboraInit=false;
         }
     }
 
@@ -825,7 +823,6 @@ class ReactExoplayerView extends FrameLayout implements
         startBufferCheckTimer();
 
         if (player != null && youboraPlugin == null && (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
-            this.triedYouboraInit=true;
             initialiseYoubora();
         }
     }
@@ -2158,7 +2155,6 @@ class ReactExoplayerView extends FrameLayout implements
         this.analyticsMeta = analyticsData;
 
         if (player != null && youboraPlugin == null && (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
-            // this.triedYouboraInit=true;
             initialiseYoubora();
         }
     }
