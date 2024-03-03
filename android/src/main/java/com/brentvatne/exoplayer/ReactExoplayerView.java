@@ -828,8 +828,9 @@ class ReactExoplayerView extends FrameLayout implements
             if (youboraPlugin != null) {
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
-                youboraPlugin = null;
+                this.youboraPlugin = null;
             }
+            Log.d("Youboraaaaaa", "finishPlayerInitialization youboraPlugin: "+youboraPlugin);
             if (youboraPlugin == null) {
                 initialiseYoubora();
             }
@@ -1009,9 +1010,9 @@ class ReactExoplayerView extends FrameLayout implements
             if (youboraPlugin != null) {
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
-                youboraPlugin = null;
-                contentId = null;
-                analyticsMeta = null;
+                this.youboraPlugin = null;
+                this.contentId = null;
+                this.analyticsMeta = null;
             }
         }
         if (adsLoader != null) {
@@ -1637,9 +1638,9 @@ class ReactExoplayerView extends FrameLayout implements
                 if (youboraPlugin != null) {
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
-                    youboraPlugin = null;
-                    contentId = null;
-                    analyticsMeta = null;
+                    this.youboraPlugin = null;
+                    this.contentId = null;
+                    this.analyticsMeta = null;
                 }
                 reloadSource();
             }
@@ -2164,11 +2165,12 @@ class ReactExoplayerView extends FrameLayout implements
         this.analyticsMeta = analyticsData;
 
         if (player != null && (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
-            if (youboraPlugin != null ) {
+            if (youboraPlugin != null) {
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
-                youboraPlugin = null;
+                this.youboraPlugin = null;
             }
+            Log.d("Youboraaaaaa", "youboraPlugin: "+youboraPlugin);
             if (youboraPlugin == null) {
                 initialiseYoubora();
             }
