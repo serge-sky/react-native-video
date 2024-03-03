@@ -824,24 +824,13 @@ class ReactExoplayerView extends FrameLayout implements
         applyModifiers();
         startBufferCheckTimer();
 
-        Log.d("Youboraaaaaa", "finishPlayerInitialization player: "+player);
-        Log.d("Youboraaaaaa", "finishPlayerInitialization player: "+analyticsMeta);
-        Log.d("Youboraaaaaa", "finishPlayerInitialization player: "+this.analyticsMeta);
-
-        if (analyticsMeta != null) {
-        Log.d("Youboraaaaaa", "finishPlayerInitialization contentIsLive: "+analyticsMeta.getBoolean("contentIsLive"));
-        Log.d("Youboraaaaaa", "finishPlayerInitialization contentId: "+contentId);
-        Log.d("Youboraaaaaa", "finishPlayerInitialization contentId: "+analyticsMeta.getString("contentId"));
-
-        }
-
         if (player != null && (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
             if (youboraPlugin != null) {
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
                 this.youboraPlugin = null;
             }
-            Log.d("Youboraaaaaa", "finishPlayerInitialization youboraPlugin: "+youboraPlugin);
+            
             if (youboraPlugin == null) {
                 initialiseYoubora();
             }
@@ -1018,13 +1007,11 @@ class ReactExoplayerView extends FrameLayout implements
             player.removeListener(this);
             trackSelector = null;
             player = null;
-            Log.d("Youboraaaa","releasePlayer youboraPlugin: "+youboraPlugin);
             if (youboraPlugin != null) {
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
                 this.youboraPlugin = null;
                 this.contentId = null;
-                this.analyticsMeta = null;
             }
         }
         if (adsLoader != null) {
@@ -1647,7 +1634,6 @@ class ReactExoplayerView extends FrameLayout implements
                             this.requestHeaders);
 
             if (!isSourceEqual) {
-                Log.d("Youboraaaa","isSourceEqual not equal youboraPlugin: "+youboraPlugin);
                 if (youboraPlugin != null) {
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
@@ -2176,21 +2162,12 @@ class ReactExoplayerView extends FrameLayout implements
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
 
- Log.d("Youboraaaaaa", "setAnalyticsMeta player"+player);
-        if (analyticsMeta != null) {
-        Log.d("Youboraaaaaa", "setAnalyticsMeta contentIsLive: "+analyticsMeta.getBoolean("contentIsLive"));
-        Log.d("Youboraaaaaa", "setAnalyticsMeta contentId: "+contentId);
-        Log.d("Youboraaaaaa", "setAnalyticsMeta contentId: "+analyticsMeta.getString("contentId"));
-
-        }
-
         if (player != null && (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
             if (youboraPlugin != null) {
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
                 this.youboraPlugin = null;
             }
-            Log.d("Youboraaaaaa", "setAnalyticsMeta youboraPlugin: "+youboraPlugin);
             if (youboraPlugin == null) {
                 initialiseYoubora();
             }
