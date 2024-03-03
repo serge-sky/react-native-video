@@ -597,15 +597,6 @@ class ReactExoplayerView extends FrameLayout implements
         if (analyticsMeta.hasKey("appReleaseVersion")) {
             youboraOptions.setAppReleaseVersion(analyticsMeta.getString("appReleaseVersion"));
         }
-        if (analyticsMeta.hasKey("contentResource")) {
-            youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
-        }
-        if (analyticsMeta.hasKey("contentDuration")) {
-            youboraOptions.setContentDuration(analyticsMeta.getDouble("contentDuration"));
-        }
-        if (analyticsMeta.hasKey("contentResource")) {
-            youboraOptions.setContentResource(analyticsMeta.getString("contentResource"));
-        }
         if (analyticsMeta.hasKey("contentPlaybackType")) {
             youboraOptions.setContentPlaybackType(analyticsMeta.getString("contentPlaybackType"));
         }
@@ -748,9 +739,6 @@ class ReactExoplayerView extends FrameLayout implements
 
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
-        if (analyticsMeta != null) {
-            initialiseYoubora();
-        }
         changeAudioOutput(this.audioOutput);
     }
 
@@ -835,6 +823,18 @@ class ReactExoplayerView extends FrameLayout implements
         setControls(controls);
         applyModifiers();
         startBufferCheckTimer();
+
+        if (player != null && (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
+            if (youboraPlugin != null) {
+                youboraPlugin.getAdapter().unregisterListeners();
+                youboraPlugin.getAdapter().fireStop();
+                youboraPlugin = null;
+            }
+            
+            if (youboraPlugin == null) {
+                initialiseYoubora();
+            }
+        }
     }
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
@@ -1008,7 +1008,10 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
             if (youboraPlugin != null) {
+                youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
+                youboraPlugin = null;
+                contentId = null;
             }
         }
         if (adsLoader != null) {
@@ -1631,11 +1634,11 @@ class ReactExoplayerView extends FrameLayout implements
                             this.requestHeaders);
 
             if (!isSourceEqual) {
-                analyticsMeta = null;
                 if (youboraPlugin != null) {
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
+                    contentId = null;
                 }
                 reloadSource();
             }
@@ -2158,14 +2161,16 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
-        if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
-            initialiseYoubora();
-        }
-        if (player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
-            youboraPlugin.getAdapter().unregisterListeners();
-            youboraPlugin.getAdapter().fireStop();
-            youboraPlugin = null;
-            initialiseYoubora();
+
+        if (player != null && (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
+            if (youboraPlugin != null) {
+                youboraPlugin.getAdapter().unregisterListeners();
+                youboraPlugin.getAdapter().fireStop();
+                youboraPlugin = null;
+            }
+            if (youboraPlugin == null) {
+                initialiseYoubora();
+            }
         }
     }
 
