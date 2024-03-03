@@ -1011,6 +1011,7 @@ class ReactExoplayerView extends FrameLayout implements
                 youboraPlugin = null;
                 contentId = null;
                 analyticsMeta = null;
+                Log.d("Youboraaaaaa","releasePlayer");
             }
         }
         if (adsLoader != null) {
@@ -1639,6 +1640,7 @@ class ReactExoplayerView extends FrameLayout implements
                     youboraPlugin = null;
                     contentId = null;
                     analyticsMeta = null;
+                    Log.d("Youboraaaaaa","isSourceEqual");
                 }
                 reloadSource();
             }
