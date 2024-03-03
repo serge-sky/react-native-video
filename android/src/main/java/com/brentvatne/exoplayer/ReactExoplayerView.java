@@ -825,6 +825,8 @@ class ReactExoplayerView extends FrameLayout implements
         startBufferCheckTimer();
 
         Log.d("Youboraaaaaa", "finishPlayerInitialization player: "+player);
+        Log.d("Youboraaaaaa", "finishPlayerInitialization player: "+analyticsMeta);
+        Log.d("Youboraaaaaa", "finishPlayerInitialization player: "+this.analyticsMeta);
 
         if (analyticsMeta != null) {
         Log.d("Youboraaaaaa", "finishPlayerInitialization contentIsLive: "+analyticsMeta.getBoolean("contentIsLive"));
@@ -1016,6 +1018,7 @@ class ReactExoplayerView extends FrameLayout implements
             player.removeListener(this);
             trackSelector = null;
             player = null;
+            Log.d("Youboraaaa","releasePlayer youboraPlugin: "+youboraPlugin);
             if (youboraPlugin != null) {
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
@@ -1644,12 +1647,12 @@ class ReactExoplayerView extends FrameLayout implements
                             this.requestHeaders);
 
             if (!isSourceEqual) {
+                Log.d("Youboraaaa","isSourceEqual not equal youboraPlugin: "+youboraPlugin);
                 if (youboraPlugin != null) {
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
                     this.youboraPlugin = null;
                     this.contentId = null;
-                    this.analyticsMeta = null;
                 }
                 reloadSource();
             }
