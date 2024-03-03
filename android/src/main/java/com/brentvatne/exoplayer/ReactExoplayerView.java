@@ -824,6 +824,15 @@ class ReactExoplayerView extends FrameLayout implements
         applyModifiers();
         startBufferCheckTimer();
 
+        Log.d("Youboraaaaaa", "finishPlayerInitialization player: "+player);
+
+        if (analyticsMeta != null) {
+        Log.d("Youboraaaaaa", "finishPlayerInitialization contentIsLive: "+analyticsMeta.getBoolean("contentIsLive"));
+        Log.d("Youboraaaaaa", "finishPlayerInitialization contentId: "+contentId);
+        Log.d("Youboraaaaaa", "finishPlayerInitialization contentId: "+analyticsMeta.getString("contentId"));
+
+        }
+
         if (player != null && (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
             if (youboraPlugin != null) {
                 youboraPlugin.getAdapter().unregisterListeners();
@@ -2164,13 +2173,21 @@ class ReactExoplayerView extends FrameLayout implements
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
 
+ Log.d("Youboraaaaaa", "setAnalyticsMeta player"+player);
+        if (analyticsMeta != null) {
+        Log.d("Youboraaaaaa", "setAnalyticsMeta contentIsLive: "+analyticsMeta.getBoolean("contentIsLive"));
+        Log.d("Youboraaaaaa", "setAnalyticsMeta contentId: "+contentId);
+        Log.d("Youboraaaaaa", "setAnalyticsMeta contentId: "+analyticsMeta.getString("contentId"));
+
+        }
+
         if (player != null && (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
             if (youboraPlugin != null) {
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
                 this.youboraPlugin = null;
             }
-            Log.d("Youboraaaaaa", "youboraPlugin: "+youboraPlugin);
+            Log.d("Youboraaaaaa", "setAnalyticsMeta youboraPlugin: "+youboraPlugin);
             if (youboraPlugin == null) {
                 initialiseYoubora();
             }
