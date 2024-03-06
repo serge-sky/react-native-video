@@ -1001,6 +1001,8 @@ class ReactExoplayerView extends FrameLayout implements
             player = null;
             if (youboraPlugin != null) {
                 Log.d("Youboraaaaa","releasePlayer: ");
+                youboraPlugin.getAdapter().unregisterListeners();
+                youboraPlugin.getAdapter().fireStop();
                 youboraPlugin = null;
                 contentId = null;
             }
@@ -1627,6 +1629,7 @@ class ReactExoplayerView extends FrameLayout implements
             if (!isSourceEqual) {
                 if (youboraPlugin != null) {
                     Log.d("Youboraaaaa","isSourceEqual: "+isSourceEqual);
+                    youboraPlugin = null;
                     contentId = null;
                 }
                 reloadSource();
@@ -2150,6 +2153,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
+        Log.d("Youboraaaaaaa","setAnalyticsMeta");
 
         if (player != null && youboraPlugin == null && (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
             initialiseYoubora();
