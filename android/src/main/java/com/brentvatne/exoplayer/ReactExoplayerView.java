@@ -1001,8 +1001,6 @@ class ReactExoplayerView extends FrameLayout implements
             player = null;
             if (youboraPlugin != null) {
                 Log.d("Youboraaaaa","releasePlayer: ");
-                youboraPlugin.getAdapter().unregisterListeners();
-                youboraPlugin.getAdapter().fireStop();
                 youboraPlugin = null;
                 contentId = null;
             }
@@ -1629,9 +1627,6 @@ class ReactExoplayerView extends FrameLayout implements
             if (!isSourceEqual) {
                 if (youboraPlugin != null) {
                     Log.d("Youboraaaaa","isSourceEqual: "+isSourceEqual);
-                    youboraPlugin.getAdapter().unregisterListeners();
-                    youboraPlugin.getAdapter().fireStop();
-                    youboraPlugin = null;
                     contentId = null;
                 }
                 reloadSource();
