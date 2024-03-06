@@ -530,9 +530,7 @@ class ReactExoplayerView extends FrameLayout implements
     private void initialiseYoubora() {
         if (analyticsMeta == null) return;
 
-        if (BuildConfig.DEBUG) {
-            YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
-        }
+        YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE);
 
         contentId = analyticsMeta.getString("contentId");
 
