@@ -822,8 +822,6 @@ class ReactExoplayerView extends FrameLayout implements
         applyModifiers();
         startBufferCheckTimer();
 
-        Log.d("Youboraaaaaaa","finishPlayerInitialization");
-
         if (player != null && youboraPlugin == null && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
             initialiseYoubora();
         }
@@ -1000,8 +998,6 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
             if (youboraPlugin != null) {
-                Log.d("Youboraaaaa","releasePlayer: ");
-                Log.d("Youboraaaaa","data: "+analyticsMeta.toString());
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
                 youboraPlugin = null;
@@ -1627,8 +1623,6 @@ class ReactExoplayerView extends FrameLayout implements
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             this.requestHeaders);
 
-            Log.d("Youboraaaaa","setSrc isSourceEqual: "+isSourceEqual);
-            Log.d("Youboraaaaa","setSrc youboraPlugin: "+youboraPlugin);
             if (!isSourceEqual) {
                 if (youboraPlugin != null) {
                     youboraPlugin.getAdapter().unregisterListeners();
