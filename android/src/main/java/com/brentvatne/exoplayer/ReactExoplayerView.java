@@ -822,9 +822,9 @@ class ReactExoplayerView extends FrameLayout implements
         applyModifiers();
         startBufferCheckTimer();
 
-                Log.d("Youboraaaaaaa","finishPlayerInitialization");
+        Log.d("Youboraaaaaaa","finishPlayerInitialization");
 
-        if (player != null && youboraPlugin == null && (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
+        if (player != null && youboraPlugin == null && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
             initialiseYoubora();
         }
     }
@@ -2157,25 +2157,6 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
-        Log.d("Youboraaaaaaa","setAnalyticsMeta");
-
-        if (analyticsMeta != null) {
-            Log.d("Youboraaaaa","setAnalyticsMeta analyticsMeta: "+analyticsMeta.toString());
-            Log.d("Youboraaaaa","setAnalyticsMeta contentId: "+contentId);
-        }
-
-        if (player != null && (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
-            if (youboraPlugin == null) {
-                Log.d("Youboraaaaaaa","youboraPlugin1: "+youboraPlugin);
-                initialiseYoubora();
-            } else if (youboraPlugin != null && youboraPlugin.getAdapter() != null) {
-                Log.d("Youboraaaaaaa","youboraPlugin2: "+youboraPlugin);
-                youboraPlugin.getAdapter().unregisterListeners();
-                youboraPlugin.getAdapter().fireStop();
-                youboraPlugin = null;
-                initialiseYoubora();
-            } 
-        }
     }
 
     public void setAssetId(String assetId) {
