@@ -1636,12 +1636,17 @@ class ReactExoplayerView extends FrameLayout implements
                             this.requestHeaders);
 
             if (!isSourceEqual) {
+                if (analyticsMeta && analyticsMeta.getBoolean("contentIsLive")) {
+                    analyticsMeta = null;
+                }
                 if (youboraPlugin != null) {
                     Log.d("Youboraaa", "inside !isSourceEqual");
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
-                    contentId = null;
+                    if (!analyticsMeta.getBoolean("contentIsLive")) {
+                        contentId = null;
+                    }
                 }
                 reloadSource();
             }
@@ -2164,6 +2169,18 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
+
+        if (analyticsMeta.getBoolean("contentIsLive")) {
+            if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
+                initialiseYoubora();
+            }
+            if (player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
+                youboraPlugin.getAdapter().unregisterListeners();
+                youboraPlugin.getAdapter().fireStop();
+                youboraPlugin = null;
+                initialiseYoubora();
+            }
+        }
     }
 
     public void setAssetId(String assetId) {
