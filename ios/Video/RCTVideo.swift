@@ -6,10 +6,14 @@ import GoogleInteractiveMediaAds
 #endif
 import React
 import Promises
+import YouboraLib
+import YouboraAVPlayerAdapter
 
 class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler {
 
     private var _player:AVPlayer?
+    private var _plugin:YBPlugin?;
+
     private var _playerItem:AVPlayerItem?
     private var _source:VideoSource?
     private var _playerBufferEmpty:Bool = true
@@ -64,6 +68,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterName:String!
     private var _filterEnabled:Bool = false
     private var _presentingViewController:UIViewController?
+    private var _contentId:String!
+    private var _analyticsMeta:NSDictionary = NSDictionary()
 
     /* IMA Ads */
     private var _adTagUrl:String?
@@ -110,7 +116,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onRestoreUserInterfaceForPictureInPictureStop: RCTDirectEventBlock?
     @objc var onGetLicense: RCTDirectEventBlock?
     @objc var onReceiveAdEvent: RCTDirectEventBlock?
-    
+
     @objc func _onPictureInPictureStatusChanged() {
         onPictureInPictureStatusChanged?([ "isActive": NSNumber(value: true)])
     }
@@ -252,10 +258,57 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 "atValue": NSNumber(value: currentTime?.value ?? .zero),
                 "currentPlaybackTime": NSNumber(value: NSNumber(value: floor(currentPlaybackTime?.timeIntervalSince1970 ?? 0 * 1000)).int64Value),
                 "target": reactTag,
-                "seekableDuration": RCTVideoUtils.calculateSeekableDuration(_player)
+                "seekableDuration": RCTVideoUtils.calculateSeekableDuration(_player),
+                "seekableStart": RCTVideoUtils.calculateSeekableStart(_player)
             ])
         }
     }
+
+    @objc
+    func setAnalyticsMeta(_ analyticsMeta:NSDictionary) {
+        _analyticsMeta = analyticsMeta
+
+        if (_plugin != nil &&
+            _contentId != _analyticsMeta.object(forKey: "contentId") as! String) {
+
+            _plugin?.removeAdapter()
+            _plugin?.fireStop()
+            initAnalytics()
+        }
+    }
+
+    @objc
+    func initAnalytics() {
+        if (_analyticsMeta == nil) {
+            DebugLog("No youbora analytics data")
+            return
+        }
+
+        YBLog.setDebugLevel(YBLogLevel.verbose)
+
+        let options = YBOptions()
+
+        let youboraAnalyticsMeta: Dictionary<String,Any> = _analyticsMeta as! Dictionary<String,Any>
+
+        for (key, value) in youboraAnalyticsMeta {
+            if (key != "origin") {
+                options.setValue(value, forKey: key)
+            }
+        }
+
+        _plugin = YBPlugin(options: options)
+
+        _contentId = youboraAnalyticsMeta["contentId"] as! String
+
+        let isOffline = youboraAnalyticsMeta["offline"] as! Bool
+
+        if (!isOffline) {
+            _plugin?.fireOfflineEvents()
+        }
+
+        _plugin?.adapter = YBAVPlayerAdapter.init(player: _player!) as? YBPlayerAdapter<AnyObject>
+    }
+
 
     // MARK: - Player and source
     @objc
@@ -329,6 +382,15 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerObserver.player = self._player
                     self.applyModifiers()
                     self._player?.actionAtItemEnd = .none
+
+                    if (self._analyticsMeta != nil) {
+                        let origin:String = self._analyticsMeta.object(forKey: "origin") as? String ?? ""
+                        if (origin.count == 0)
+                        {
+                            self.initAnalytics()
+                        }
+                    }
+
 
                     if #available(iOS 10.0, *) {
                         self.setAutomaticallyWaitsToMinimizeStalling(self._automaticallyWaitsToMinimizeStalling)
@@ -947,7 +1009,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     override func removeFromSuperview() {
         _player?.pause()
+        _plugin?.removeAdapter()
         _player = nil
+        _plugin = nil
         _resouceLoaderDelegate = nil
         _playerObserver.clearPlayer()
 
