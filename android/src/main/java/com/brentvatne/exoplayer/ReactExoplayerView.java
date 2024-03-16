@@ -739,6 +739,9 @@ class ReactExoplayerView extends FrameLayout implements
 
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
+        if (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive")) {
+            initialiseYoubora();
+        }
         changeAudioOutput(this.audioOutput);
     }
 
@@ -824,16 +827,7 @@ class ReactExoplayerView extends FrameLayout implements
         applyModifiers();
         startBufferCheckTimer();
 
-        Log.d("Youboraaa", "finishPlayerInitialization");
-        Log.d("Youboraaa", "player: "+player);
-        Log.d("Youboraaa", "youboraPlugin: "+youboraPlugin);
-        if (analyticsMeta != null) {
-            Log.d("Youboraaa", "analyticsMeta: "+analyticsMeta.toString());
-            if (contentId != null) {
-                Log.d("Youboraaa", "contentId: "+contentId);
-            }
-        }
-        if (player != null && youboraPlugin == null && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
+        if (player != null && youboraPlugin == null && (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
             initialiseYoubora();
         }
     }
@@ -1009,7 +1003,6 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
             if (youboraPlugin != null) {
-                Log.d("Youboraaa", "releasePlayer");
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
                 youboraPlugin = null;
@@ -1640,7 +1633,6 @@ class ReactExoplayerView extends FrameLayout implements
                     analyticsMeta = null;
                 }
                 if (youboraPlugin != null) {
-                    Log.d("Youboraaa", "inside !isSourceEqual");
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
