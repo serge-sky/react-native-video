@@ -1003,6 +1003,7 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
             if (youboraPlugin != null) {
+                Log.d("Youboraaaaa","before firestop inside releasePlayer");
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
                 youboraPlugin = null;
@@ -1633,6 +1634,7 @@ class ReactExoplayerView extends FrameLayout implements
                 //     analyticsMeta = null;
                 // }
                 if (youboraPlugin != null) {
+                    Log.d("Youboraaaaa","before firestop inside setSrc");
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
@@ -2167,6 +2169,7 @@ class ReactExoplayerView extends FrameLayout implements
                 initialiseYoubora();
             }
             if (player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
+                Log.d("Youboraaaaa","before firestop inside setAnalyticsMeta");
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
                 youboraPlugin = null;
