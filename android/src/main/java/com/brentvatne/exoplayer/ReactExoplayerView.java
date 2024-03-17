@@ -251,7 +251,7 @@ class ReactExoplayerView extends FrameLayout implements
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
 
-    private boolean calledSrc = false;
+    private boolean srcChanged = false;
 
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -622,7 +622,7 @@ class ReactExoplayerView extends FrameLayout implements
             Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
             youboraPlugin.setAdapter(adapter);
             youboraPlugin.getAdapter().fireStart();
-            calledSrc = false; //reset value of calledSrc
+            srcChanged = false; //reset value of srcChanged
         }
     }
 
@@ -1006,7 +1006,6 @@ class ReactExoplayerView extends FrameLayout implements
             trackSelector = null;
             player = null;
             if (youboraPlugin != null) {
-                Log.d("Youboraaaaa","before firestop inside releasePlayer");
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
                 youboraPlugin = null;
@@ -1633,12 +1632,8 @@ class ReactExoplayerView extends FrameLayout implements
                             this.requestHeaders);
 
             if (!isSourceEqual) {
-                // if (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive")) {
-                //     analyticsMeta = null;
-                // }
                 if (youboraPlugin != null) {
-                    calledSrc = true;
-                    Log.d("Youboraaaaa","before firestop inside setSrc");
+                    srcChanged = true;
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
@@ -2168,18 +2163,10 @@ class ReactExoplayerView extends FrameLayout implements
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
 
-        if (analyticsData != null && analyticsData.getBoolean("contentIsLive") && calledSrc) {
+        if (analyticsData != null && analyticsData.getBoolean("contentIsLive") && srcChanged) {
             if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
-                Log.d("Youboraaaaa","before fireStart inside setAnalyticsMeta");
                 initialiseYoubora();
             }
-            // if (player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
-            //     Log.d("Youboraaaaa","before firestop inside setAnalyticsMeta");
-            //     youboraPlugin.getAdapter().unregisterListeners();
-            //     youboraPlugin.getAdapter().fireStop();
-            //     youboraPlugin = null;
-            //     initialiseYoubora();
-            // }
         }
     }
 
