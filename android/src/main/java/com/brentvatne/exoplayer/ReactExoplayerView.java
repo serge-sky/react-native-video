@@ -251,6 +251,8 @@ class ReactExoplayerView extends FrameLayout implements
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
 
+    private boolean srcChanged = false;
+
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -620,6 +622,7 @@ class ReactExoplayerView extends FrameLayout implements
             Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
             youboraPlugin.setAdapter(adapter);
             youboraPlugin.getAdapter().fireStart();
+            srcChanged = false; //reset value of srcChanged
         }
     }
 
@@ -739,6 +742,9 @@ class ReactExoplayerView extends FrameLayout implements
 
         PlaybackParameters params = new PlaybackParameters(rate, 1f);
         player.setPlaybackParameters(params);
+        if (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive")) {
+            initialiseYoubora();
+        }
         changeAudioOutput(this.audioOutput);
     }
 
@@ -824,7 +830,7 @@ class ReactExoplayerView extends FrameLayout implements
         applyModifiers();
         startBufferCheckTimer();
 
-        if (player != null && youboraPlugin == null && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
+        if (player != null && youboraPlugin == null && (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
             initialiseYoubora();
         }
     }
@@ -1627,10 +1633,13 @@ class ReactExoplayerView extends FrameLayout implements
 
             if (!isSourceEqual) {
                 if (youboraPlugin != null) {
+                    srcChanged = true;
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
-                    contentId = null;
+                    if (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive")) {
+                        contentId = null;
+                    }
                 }
                 reloadSource();
             }
@@ -2153,6 +2162,12 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
+
+        if (analyticsData != null && analyticsData.getBoolean("contentIsLive") && srcChanged) {
+            if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
+                initialiseYoubora();
+            }
+        }
     }
 
     public void setAssetId(String assetId) {
