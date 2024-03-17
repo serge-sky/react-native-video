@@ -1635,8 +1635,8 @@ class ReactExoplayerView extends FrameLayout implements
                 // }
                 if (youboraPlugin != null) {
                     Log.d("Youboraaaaa","before firestop inside setSrc");
-                    // youboraPlugin.getAdapter().unregisterListeners();
-                    // youboraPlugin.getAdapter().fireStop();
+                    youboraPlugin.getAdapter().unregisterListeners();
+                    youboraPlugin.getAdapter().fireStop();
                     youboraPlugin = null;
                     if (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive")) {
                         contentId = null;
@@ -2166,6 +2166,7 @@ class ReactExoplayerView extends FrameLayout implements
 
         if (analyticsData != null && analyticsData.getBoolean("contentIsLive")) {
             if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
+                Log.d("Youboraaaaa","before fireStart inside setAnalyticsMeta");
                 initialiseYoubora();
             }
             // if (player != null && analyticsData != null && youboraPlugin != null && youboraPlugin.getAdapter() != null && contentId != analyticsData.getString("contentId")) {
