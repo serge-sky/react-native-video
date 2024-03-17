@@ -251,6 +251,8 @@ class ReactExoplayerView extends FrameLayout implements
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
 
+    private boolean calledSrc = false;
+
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -620,6 +622,7 @@ class ReactExoplayerView extends FrameLayout implements
             Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
             youboraPlugin.setAdapter(adapter);
             youboraPlugin.getAdapter().fireStart();
+            calledSrc = false; //reset value of calledSrc
         }
     }
 
@@ -1634,6 +1637,7 @@ class ReactExoplayerView extends FrameLayout implements
                 //     analyticsMeta = null;
                 // }
                 if (youboraPlugin != null) {
+                    calledSrc = true;
                     Log.d("Youboraaaaa","before firestop inside setSrc");
                     youboraPlugin.getAdapter().unregisterListeners();
                     youboraPlugin.getAdapter().fireStop();
@@ -2164,7 +2168,7 @@ class ReactExoplayerView extends FrameLayout implements
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
 
-        if (analyticsData != null && analyticsData.getBoolean("contentIsLive")) {
+        if (analyticsData != null && analyticsData.getBoolean("contentIsLive") && calledSrc) {
             if (player != null && analyticsData != null && youboraPlugin == null && contentId != analyticsData.getString("contentId")) {
                 Log.d("Youboraaaaa","before fireStart inside setAnalyticsMeta");
                 initialiseYoubora();
