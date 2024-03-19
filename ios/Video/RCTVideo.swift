@@ -12,7 +12,7 @@ import YouboraAVPlayerAdapter
 class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler {
 
     private var _player:AVPlayer?
-    private var _plugin:YBPlugin?;
+    private var _plugin:YBPlugin?
 
     private var _playerItem:AVPlayerItem?
     private var _source:VideoSource?
@@ -306,7 +306,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _plugin?.fireOfflineEvents()
         }
 
-        _plugin?.adapter = YBAVPlayerAdapter.init(player: _player!) as? YBPlayerAdapter<AnyObject>
+        _plugin?.adapter = YBAVPlayerAdapterSwiftTranformer.transform(from: YBAVPlayerAdapter(player: _player!))
     }
 
 
