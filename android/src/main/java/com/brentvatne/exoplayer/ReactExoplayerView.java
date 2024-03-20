@@ -1632,13 +1632,15 @@ class ReactExoplayerView extends FrameLayout implements
                             this.requestHeaders);
 
             if (!isSourceEqual) {
-                if (youboraPlugin != null) {
-                    srcChanged = true;
-                    youboraPlugin.getAdapter().unregisterListeners();
-                    youboraPlugin.getAdapter().fireStop();
-                    youboraPlugin = null;
-                    if (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive")) {
-                        contentId = null;
+                if (!uri.equals(srcUri)) {
+                    if (youboraPlugin != null) {
+                        srcChanged = true;
+                        youboraPlugin.getAdapter().unregisterListeners();
+                        youboraPlugin.getAdapter().fireStop();
+                        youboraPlugin = null;
+                        if (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive")) {
+                            contentId = null;
+                        }
                     }
                 }
                 reloadSource();
