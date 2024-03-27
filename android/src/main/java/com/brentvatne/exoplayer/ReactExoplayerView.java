@@ -2147,18 +2147,18 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
-
-        if (player != null && youboraPlugin == null && analyticsMeta != null && analyticsMeta.hasKey("contentId")){
-          if( analyticsMeta.getBoolean("contentIsLive") && !analyticsMeta.getString("contentId").equals(contentId)) {
-            initialiseYoubora();
-          }
-        }  
-
-        if(player != null && analyticsData == null && youboraPlugin != null && youboraPlugin.getAdapter() != null) {
+        
+        if(analyticsMeta != null) {
+            //init youbora when player is loaded and youbora is not initalized, also the content need to be live tv and analyticMeta is not nuil and not the same as current
+          if (player != null && youboraPlugin == null &&  analyticsMeta.getBoolean("contentIsLive") && !analyticsMeta.getString("contentId").equals(contentId)){
+            initialiseYoubora();       
+          }  
+        } else if(player != null && youboraPlugin != null && youboraPlugin.getAdapter() != null) {
+        //stop youbora when player is loaded and youbora is initalized and analyticMeta nuil
             youboraPlugin.getAdapter().unregisterListeners();
             youboraPlugin.getAdapter().fireStop();
             youboraPlugin = null;
-        }
+        }    
     }
 
     public void setAssetId(String assetId) {
