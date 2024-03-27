@@ -2148,9 +2148,11 @@ class ReactExoplayerView extends FrameLayout implements
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
 
-        if (player != null && youboraPlugin == null && (analyticsMeta != null && analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
+        if (player != null && youboraPlugin == null && analyticsMeta != null && analyticsMeta.hasKey("contentId")){
+          if( analyticsMeta.getBoolean("contentIsLive") && !analyticsMeta.getString("contentId").equals(contentId)) {
             initialiseYoubora();
-        }
+          }
+        }  
 
         if(player != null && analyticsData == null && youboraPlugin != null && youboraPlugin.getAdapter() != null) {
             youboraPlugin.getAdapter().unregisterListeners();
