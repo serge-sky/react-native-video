@@ -2150,7 +2150,7 @@ class ReactExoplayerView extends FrameLayout implements
         
         if(player != null) {
             //init youbora when player is loaded and youbora is not initalized, also the content need to be live tv and analyticMeta is not nuil and not the same as current
-          if ( analyticsMeta != null && youboraPlugin == null &&  analyticsMeta.getBoolean("contentIsLive") && !analyticsMeta.getString("contentId").equals(contentId)){
+          if ( analyticsMeta != null && youboraPlugin == null &&  analyticsMeta.getBoolean("contentIsLive")){
             initialiseYoubora();       
           }  
           if( analyticsMeta == null && youboraPlugin != null && youboraPlugin.getAdapter() != null) {
