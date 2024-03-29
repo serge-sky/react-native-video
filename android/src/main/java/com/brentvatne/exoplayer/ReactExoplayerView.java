@@ -133,6 +133,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
+import com.penthera.virtuososdk.client.IAsset;
+import com.penthera.virtuososdk.client.IIdentifier;
+import com.penthera.virtuososdk.client.ISegmentedAsset;
+import com.penthera.virtuososdk.client.Virtuoso;
+import com.penthera.virtuososdk.support.exoplayer218.drm.ExoplayerDrmSessionManager;
+
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
         LifecycleEventListener,
@@ -653,13 +659,26 @@ class ReactExoplayerView extends FrameLayout implements
                             @Override
                             public void run() {
                                 // DRM initialization must run on a different thread
-                                DrmSessionManager drmSessionManager = initializePlayerDrm(self);
+                                DrmSessionManager drmSessionManager = null;
+
+                                if (extension.equals("download")) {
+                                    try {
+                                        drmSessionManager = buildDrmSessionManager(self.assetId);
+                                    } catch (Exception e) {
+                                        eventEmitter.error("Failed to setup downloads DRM", e);
+                                        return;
+                                    }
+                                } else {
+                                    drmSessionManager = initializePlayerDrm(self);
+                                }
+
                                 if (drmSessionManager == null && self.drmUUID != null) {
                                     // Failed to intialize DRM session manager - cannot continue
                                     Log.e("ExoPlayer Exception", "Failed to initialize DRM Session Manager Framework!");
                                     eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
                                     return;
                                 }
+                                // End DRM
 
                                 if (activity == null) {
                                     Log.e("ExoPlayer Exception", "Failed to initialize Player!");
@@ -828,6 +847,44 @@ class ReactExoplayerView extends FrameLayout implements
             initialiseYoubora();
         }
     }
+
+    private DrmSessionManager buildDrmSessionManager(String assetId) {
+        if (assetId == null) {
+            return null;
+        }
+        Virtuoso virtuoso = new Virtuoso(getContext());
+
+        IAsset asset = null;
+
+        List<IIdentifier> list = virtuoso.getAssetManager().getByAssetId(assetId);
+        if (list != null && list.size() > 0) {
+            asset = (IAsset) list.get(0);
+        }
+
+        ISegmentedAsset segmentedAsset = asset instanceof ISegmentedAsset ? (ISegmentedAsset) asset : null;
+
+        if (segmentedAsset != null) {
+            String drmUuid = segmentedAsset.contentProtectionUuid();
+            if (drmUuid != null) {
+                UUID drmSchemeUuid = null;
+                if (!TextUtils.isEmpty(drmUuid))
+                    drmSchemeUuid = Util.getDrmUuid(drmUuid);
+
+                if (drmSchemeUuid != null) {
+                    try {
+                        return new ExoplayerDrmSessionManager(getContext(), drmSchemeUuid, segmentedAsset, null, null, null, new int[0], true);
+
+                    } catch (com.penthera.virtuososdk.client.drm.UnsupportedDrmException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        }
+
+        return null;
+    }
+
 
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
         return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, 0);
