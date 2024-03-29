@@ -60,6 +60,7 @@ import com.google.android.exoplayer2.drm.DrmSessionEventListener;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSessionManagerProvider;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
+import com.google.android.exoplayer2.drm.ExoMediaDrm;
 import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
 import com.google.android.exoplayer2.drm.OfflineLicenseHelper;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
@@ -138,6 +139,7 @@ import com.penthera.virtuososdk.client.IIdentifier;
 import com.penthera.virtuososdk.client.ISegmentedAsset;
 import com.penthera.virtuososdk.client.Virtuoso;
 import com.penthera.virtuososdk.support.exoplayer218.drm.ExoplayerDrmSessionManager;
+import com.penthera.virtuososdk.support.exoplayer218.drm.VirtuosoFrameworkMediaDrm;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -750,6 +752,7 @@ class ReactExoplayerView extends FrameLayout implements
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
         DrmSessionManager drmSessionManager = null;
+        Log.d("ExoPlayer", "Initializing DRM:"+ self.drmUUID);
         if (self.drmUUID != null) {
             try {
                 drmSessionManager = self.buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
@@ -761,7 +764,7 @@ class ReactExoplayerView extends FrameLayout implements
                 eventEmitter.error(getResources().getString(errorStringId), e, "3003");
                 return null;
             }
-        } else if (extension.equals("download")) {
+        } else {
             try {
                 drmSessionManager = buildDrmSessionManager(self.assetId);
             } catch (Exception e) {
@@ -842,6 +845,15 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    private static ExoMediaDrm createFrameworkMediaDrm(UUID uuid) {
+        try {
+            return VirtuosoFrameworkMediaDrm.newInstance(uuid);
+        } catch (UnsupportedDrmException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private DrmSessionManager buildDrmSessionManager(String assetId) {
         if (assetId == null) {
             return null;
@@ -866,9 +878,10 @@ class ReactExoplayerView extends FrameLayout implements
 
                 if (drmSchemeUuid != null) {
                     try {
-                        FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(drmSchemeUuid);
-                        return new ExoplayerDrmSessionManager.builder(segmentedAsset).setUuidAndExoMediaDrmProvider(drmSchemeUuid, mediaDrm).build();
-                    } catch (com.penthera.virtuososdk.client.drm.UnsupportedDrmException e) {
+                        ExoMediaDrm.Provider mediaDrmProvider = uuid -> createFrameworkMediaDrm(uuid);
+                        return new ExoplayerDrmSessionManager.Builder(segmentedAsset)
+                                .setUuidAndExoMediaDrmProvider(drmSchemeUuid, mediaDrmProvider).build();
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
