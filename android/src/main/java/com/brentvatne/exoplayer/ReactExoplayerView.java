@@ -659,26 +659,13 @@ class ReactExoplayerView extends FrameLayout implements
                             @Override
                             public void run() {
                                 // DRM initialization must run on a different thread
-                                DrmSessionManager drmSessionManager = null;
-
-                                if (extension.equals("download")) {
-                                    try {
-                                        drmSessionManager = buildDrmSessionManager(self.assetId);
-                                    } catch (Exception e) {
-                                        eventEmitter.error("Failed to setup downloads DRM", e);
-                                        return;
-                                    }
-                                } else {
-                                    drmSessionManager = initializePlayerDrm(self);
-                                }
-
+                                DrmSessionManager drmSessionManager = initializePlayerDrm(self);
                                 if (drmSessionManager == null && self.drmUUID != null) {
                                     // Failed to intialize DRM session manager - cannot continue
                                     Log.e("ExoPlayer Exception", "Failed to initialize DRM Session Manager Framework!");
                                     eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
                                     return;
                                 }
-                                // End DRM
 
                                 if (activity == null) {
                                     Log.e("ExoPlayer Exception", "Failed to initialize Player!");
@@ -773,6 +760,13 @@ class ReactExoplayerView extends FrameLayout implements
                         ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
                 eventEmitter.error(getResources().getString(errorStringId), e, "3003");
                 return null;
+            }
+        } else if (extension.equals("download")) {
+            try {
+                drmSessionManager = buildDrmSessionManager(self.assetId);
+            } catch (Exception e) {
+                eventEmitter.error("Failed to setup downloads DRM", e);
+                return;
             }
         }
         return drmSessionManager;
@@ -872,8 +866,8 @@ class ReactExoplayerView extends FrameLayout implements
 
                 if (drmSchemeUuid != null) {
                     try {
-                        return new ExoplayerDrmSessionManager(getContext(), drmSchemeUuid, segmentedAsset, null, null, null, new int[0], true);
-
+                        FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(drmSchemeUuid);
+                        return new ExoplayerDrmSessionManager.builder(segmentedAsset).setUuidAndExoMediaDrmProvider(drmSchemeUuid, mediaDrm).build();
                     } catch (com.penthera.virtuososdk.client.drm.UnsupportedDrmException e) {
                         e.printStackTrace();
                     }
