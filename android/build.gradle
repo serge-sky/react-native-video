@@ -128,6 +128,9 @@ dependencies {
         exclude group: 'com.android.support'
     }
 
+    implementation 'com.penthera:cnc-android-sdk:5.3.10'
+    implementation 'com.penthera:cnc-exoplayer-2_18-support:5.3.10'
+
     // All support libs must use the same version
     implementation "androidx.annotation:annotation:1.1.0"
     implementation "androidx.core:core:1.1.0"
