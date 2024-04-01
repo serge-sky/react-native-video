@@ -752,7 +752,6 @@ class ReactExoplayerView extends FrameLayout implements
 
     private DrmSessionManager initializePlayerDrm(ReactExoplayerView self) {
         DrmSessionManager drmSessionManager = null;
-        Log.d("ExoPlayer", "Initializing DRM:"+ self.drmUUID);
         if (self.drmUUID != null) {
             try {
                 drmSessionManager = self.buildDrmSessionManager(self.drmUUID, self.drmLicenseUrl,
@@ -764,7 +763,7 @@ class ReactExoplayerView extends FrameLayout implements
                 eventEmitter.error(getResources().getString(errorStringId), e, "3003");
                 return null;
             }
-        } else {
+        } else if (extension.equals("download")) {
             try {
                 drmSessionManager = buildDrmSessionManager(self.assetId);
             } catch (Exception e) {
@@ -942,7 +941,7 @@ class ReactExoplayerView extends FrameLayout implements
         if (uri == null) {
             throw new IllegalStateException("Invalid video uri");
         }
-        int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
+        int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) && !overrideExtension.equals("download") ? "." + overrideExtension
                 : uri.getLastPathSegment());
         config.setDisableDisconnectError(this.disableDisconnectError);
 
