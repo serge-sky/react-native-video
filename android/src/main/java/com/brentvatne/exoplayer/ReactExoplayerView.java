@@ -254,6 +254,8 @@ class ReactExoplayerView extends FrameLayout implements
     private Plugin youboraPlugin;
     private String contentId;
 
+    private static final String DOWNLOADED_CONTENT = "download"; // downloaded DRM
+
     // store last progress event values to avoid sending unnecessary messages
     private long lastPos = -1;
     private long lastBufferDuration = -1;
@@ -763,7 +765,7 @@ class ReactExoplayerView extends FrameLayout implements
                 eventEmitter.error(getResources().getString(errorStringId), e, "3003");
                 return null;
             }
-        } else if (extension.equals("download")) {
+        } else if (extension.equals(DOWNLOADED_CONTENT)) {
             try {
                 drmSessionManager = buildDrmSessionManager(self.assetId);
             } catch (Exception e) {
@@ -940,7 +942,7 @@ class ReactExoplayerView extends FrameLayout implements
         if (uri == null) {
             throw new IllegalStateException("Invalid video uri");
         }
-        int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) && !overrideExtension.equals("download") ? "." + overrideExtension
+        int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) && !overrideExtension.equals(DOWNLOADED_CONTENT) ? "." + overrideExtension
                 : uri.getLastPathSegment());
         config.setDisableDisconnectError(this.disableDisconnectError);
 
