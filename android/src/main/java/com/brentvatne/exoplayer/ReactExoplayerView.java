@@ -771,8 +771,7 @@ class ReactExoplayerView extends FrameLayout implements
                 drmSessionManager = buildDrmSessionManager(self.assetId);
             } catch (Exception ex) {
                 self.playerNeedsSource = true;
-                Log.e("ExoPlayer Exception", "Failed to initialize Player!");
-                Log.e("ExoPlayer Exception", ex.toString());
+                Log.e("ExoPlayer Exception", "Failed to initialize Player!", ex);
                 eventEmitter.error("Failed to setup downloads DRM", ex);
             }
         }
