@@ -60,6 +60,7 @@ import com.google.android.exoplayer2.drm.DrmSessionEventListener;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSessionManagerProvider;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
+import com.google.android.exoplayer2.drm.ExoMediaDrm;
 import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
 import com.google.android.exoplayer2.drm.OfflineLicenseHelper;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
@@ -121,6 +122,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.Map;
 import java.lang.Thread;
+import java.lang.RuntimeException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Callable;
@@ -132,6 +134,13 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
+
+import com.penthera.virtuososdk.client.IAsset;
+import com.penthera.virtuososdk.client.IIdentifier;
+import com.penthera.virtuososdk.client.ISegmentedAsset;
+import com.penthera.virtuososdk.client.Virtuoso;
+import com.penthera.virtuososdk.support.exoplayer218.drm.ExoplayerDrmSessionManager;
+import com.penthera.virtuososdk.support.exoplayer218.drm.VirtuosoFrameworkMediaDrm;
 
 @SuppressLint("ViewConstructor")
 class ReactExoplayerView extends FrameLayout implements
@@ -245,6 +254,8 @@ class ReactExoplayerView extends FrameLayout implements
     private final AudioManager.OnAudioFocusChangeListener audioFocusChangeListener;
     private Plugin youboraPlugin;
     private String contentId;
+
+    private static final String DOWNLOADED_CONTENT = "download"; // downloaded DRM
 
     // store last progress event values to avoid sending unnecessary messages
     private long lastPos = -1;
@@ -755,6 +766,14 @@ class ReactExoplayerView extends FrameLayout implements
                 eventEmitter.error(getResources().getString(errorStringId), e, "3003");
                 return null;
             }
+        } else if (extension.equals(DOWNLOADED_CONTENT)) {
+            try {
+                drmSessionManager = buildDrmSessionManager(self.assetId);
+            } catch (Exception ex) {
+                self.playerNeedsSource = true;
+                Log.e("ExoPlayer Exception", "Failed to initialize Player!", ex);
+                eventEmitter.error("Failed to setup downloads DRM", ex);
+            }
         }
         return drmSessionManager;
     }
@@ -829,6 +848,45 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    private static ExoMediaDrm createFrameworkMediaDrm(UUID uuid) {
+        try {
+            return VirtuosoFrameworkMediaDrm.newInstance(uuid);
+        } catch (UnsupportedDrmException e) {
+            throw new RuntimeException("Failed to create DRM instance");
+        }
+    }
+
+    private DrmSessionManager buildDrmSessionManager(String assetId) {
+        Virtuoso virtuoso = new Virtuoso(getContext());
+
+        List<IIdentifier> list = virtuoso.getAssetManager().getByAssetId(assetId);
+        if (list == null || list.isEmpty()) {
+            throw new RuntimeException("Asset not found: " + assetId);
+        }
+
+        IAsset asset = (IAsset) list.get(0);
+        ISegmentedAsset segmentedAsset = asset instanceof ISegmentedAsset ? (ISegmentedAsset) asset : null;
+        if (segmentedAsset == null) {
+            throw new RuntimeException("Asset is not segmented: " + assetId);
+        }
+
+        String drmUuid = segmentedAsset.contentProtectionUuid();
+        if (TextUtils.isEmpty(drmUuid)) {
+            throw new RuntimeException("DRM scheme uuid not found for asset: " + assetId);
+        }
+
+        UUID drmSchemeUuid = Util.getDrmUuid(drmUuid);
+        if (drmSchemeUuid == null) {
+            throw new RuntimeException("DRM scheme uuid not found: " + drmUuid);
+        }
+
+        ExoMediaDrm.Provider mediaDrmProvider = uuid -> createFrameworkMediaDrm(uuid);
+
+        return new ExoplayerDrmSessionManager.Builder(segmentedAsset)
+                .setUuidAndExoMediaDrmProvider(drmSchemeUuid, mediaDrmProvider).build();
+    }
+
+
     private DrmSessionManager buildDrmSessionManager(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
         return buildDrmSessionManager(uuid, licenseUrl, keyRequestPropertiesArray, 0);
     }
@@ -878,7 +936,7 @@ class ReactExoplayerView extends FrameLayout implements
         if (uri == null) {
             throw new IllegalStateException("Invalid video uri");
         }
-        int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
+        int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) && !overrideExtension.equals(DOWNLOADED_CONTENT) ? "." + overrideExtension
                 : uri.getLastPathSegment());
         config.setDisableDisconnectError(this.disableDisconnectError);
 
