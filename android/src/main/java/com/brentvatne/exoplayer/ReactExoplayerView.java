@@ -122,6 +122,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.Map;
 import java.lang.Thread;
+import java.lang.RuntimeException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Callable;
@@ -769,11 +770,10 @@ class ReactExoplayerView extends FrameLayout implements
             try {
                 drmSessionManager = buildDrmSessionManager(self.assetId);
             } catch (Exception ex) {
-                eventEmitter.error("Failed to setup downloads DRM", e);
                 self.playerNeedsSource = true;
                 Log.e("ExoPlayer Exception", "Failed to initialize Player!");
                 Log.e("ExoPlayer Exception", ex.toString());
-                self.eventEmitter.error(ex.toString(), ex, "1001");
+                eventEmitter.error("Failed to setup downloads DRM", ex);
             }
         }
         return drmSessionManager;
@@ -853,40 +853,35 @@ class ReactExoplayerView extends FrameLayout implements
         try {
             return VirtuosoFrameworkMediaDrm.newInstance(uuid);
         } catch (UnsupportedDrmException e) {
-            Log.e("ExoPlayer Exception", e.toString());
-            return null;
+            throw new RuntimeException("Failed to create DRM instance");
         }
     }
 
-    private DrmSessionManager buildDrmSessionManager(String assetId) throws Exception {
+    private DrmSessionManager buildDrmSessionManager(String assetId) {
         Virtuoso virtuoso = new Virtuoso(getContext());
 
         List<IIdentifier> list = virtuoso.getAssetManager().getByAssetId(assetId);
         if (list == null || list.isEmpty()) {
-            throw new Exception("Asset not found: " + assetId);
+            throw new RuntimeException("Asset not found: " + assetId);
         }
 
         IAsset asset = (IAsset) list.get(0);
         ISegmentedAsset segmentedAsset = asset instanceof ISegmentedAsset ? (ISegmentedAsset) asset : null;
         if (segmentedAsset == null) {
-            throw new Exception("Asset is not segmented: " + assetId);
+            throw new RuntimeException("Asset is not segmented: " + assetId);
         }
 
         String drmUuid = segmentedAsset.contentProtectionUuid();
         if (TextUtils.isEmpty(drmUuid)) {
-            throw new Exception("DRM scheme uuid not found for asset: " + assetId);
+            throw new RuntimeException("DRM scheme uuid not found for asset: " + assetId);
         }
 
         UUID drmSchemeUuid = Util.getDrmUuid(drmUuid);
         if (drmSchemeUuid == null) {
-            throw new Exception("DRM scheme uuid not found: " + drmUuid);
+            throw new RuntimeException("DRM scheme uuid not found: " + drmUuid);
         }
 
         ExoMediaDrm.Provider mediaDrmProvider = uuid -> createFrameworkMediaDrm(uuid);
-
-        if (mediaDrmProvider == null) {
-            throw new Exception("Failed to create media DRM provider");
-        }
 
         return new ExoplayerDrmSessionManager.Builder(segmentedAsset)
                 .setUuidAndExoMediaDrmProvider(drmSchemeUuid, mediaDrmProvider).build();
