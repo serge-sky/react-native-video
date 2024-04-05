@@ -1,42 +1,6 @@
 import AVFoundation
-import Promises
 import AVKit
 import Foundation
-
-// MARK: - RCTVideoAssetsUtils
-
-enum RCTVideoAssetsUtils {
-    static func getMediaSelectionGroup(
-        asset: AVAsset?,
-        for mediaCharacteristic: AVMediaCharacteristic
-    ) -> Promise<AVMediaSelectionGroup?> {
-        if #available(iOS 15, tvOS 15, visionOS 1.0, *) {
-            return wrap { handler in
-                asset?.loadMediaSelectionGroup(for: mediaCharacteristic, completionHandler: handler)
-            }
-        } else {
-            #if !os(visionOS)
-                return Promise { fulfill, _ in
-                    fulfill(asset?.mediaSelectionGroup(forMediaCharacteristic: mediaCharacteristic))
-                }
-            #endif
-        }
-    }
-
-    static func getTracks(asset: AVAsset, withMediaType: AVMediaType) -> Promise<[AVAssetTrack]?> {
-        if #available(iOS 15, tvOS 15, visionOS 1.0, *) {
-            return wrap { handler in
-                asset.loadTracks(withMediaType: withMediaType, completionHandler: handler)
-            }
-        } else {
-            #if !os(visionOS)
-                return Promise { fulfill, _ in
-                    fulfill(asset.tracks(withMediaType: withMediaType))
-                }
-            #endif
-        }
-    }
-}
 
 /*!
  * Collection of helper functions for tvOS specific features
