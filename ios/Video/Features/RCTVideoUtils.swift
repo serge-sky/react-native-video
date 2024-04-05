@@ -2,6 +2,33 @@ import AVFoundation
 import Photos
 import VirtuosoClientDownloadEngine
 
+// MARK: - RCTVideoAssetsUtils
+
+enum RCTVideoAssetsUtils {
+    static func getMediaSelectionGroup(
+        asset: AVAsset?,
+        for mediaCharacteristic: AVMediaCharacteristic
+    ) async -> AVMediaSelectionGroup? {
+        if #available(iOS 15, tvOS 15, visionOS 1.0, *) {
+            return try? await asset?.loadMediaSelectionGroup(for: mediaCharacteristic)
+        } else {
+            #if !os(visionOS)
+                return asset?.mediaSelectionGroup(forMediaCharacteristic: mediaCharacteristic)
+            #endif
+        }
+    }
+
+    static func getTracks(asset: AVAsset, withMediaType: AVMediaType) async -> [AVAssetTrack]? {
+        if #available(iOS 15, tvOS 15, visionOS 1.0, *) {
+            return try? await asset.loadTracks(withMediaType: withMediaType)
+        } else {
+            #if !os(visionOS)
+                return asset.tracks(withMediaType: withMediaType)
+            #endif
+        }
+    }
+}
+
 /*!
  * Collection of pure functions
  */
