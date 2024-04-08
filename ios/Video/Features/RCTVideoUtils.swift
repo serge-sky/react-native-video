@@ -335,4 +335,29 @@ enum RCTVideoUtils {
         }
         return (asset, assetOptions)
     }
+    
+    static func createMetadataItems(for mapping: [AVMetadataIdentifier: Any]) -> [AVMetadataItem] {
+        return mapping.compactMap { createMetadataItem(for:$0, value:$1) }
+    }
+
+    static func createMetadataItem(for identifier: AVMetadataIdentifier,
+                                    value: Any) -> AVMetadataItem {
+        let item = AVMutableMetadataItem()
+        item.identifier = identifier
+        item.value = value as? NSCopying & NSObjectProtocol
+        // Specify "und" to indicate an undefined language.
+        item.extendedLanguageTag = "und"
+        return item.copy() as! AVMetadataItem
+    }
+    
+    static func createImageMetadataItem(imageUri: String)  -> Data? {
+        if let uri = URL(string: imageUri),
+           let imgData = try? Data(contentsOf: uri),
+           let image = UIImage(data: imgData),
+           let pngData = image.pngData() {
+            return pngData
+        }
+        
+        return nil
+    }
 }
