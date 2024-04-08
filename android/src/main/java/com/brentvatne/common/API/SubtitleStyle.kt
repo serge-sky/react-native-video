@@ -18,17 +18,17 @@ class SubtitleStyle private constructor() {
         private set
     var paddingBottom = 0
         private set
-    var foregroundColor = "#FFFFFF";
+    var foregroundColor = "#FFFFFF"
         private set
-    var backgroundColor = "#000000";
+    var backgroundColor = "#000000"
         private set
-    var windowColor = "#00000000";
+    var windowColor = "#00000000"
         private set
-    var edgeType = CaptionStyleCompat.EDGE_TYPE_NONE;
+    var edgeType = CaptionStyleCompat.EDGE_TYPE_NONE
         private set
-    var edgeColor = "#00000000";
+    var edgeColor = "#00000000"
         private set
-    var fontFamilyPath = null;
+    var fontFamilyPath: String? = null
         private set
 
     companion object {
@@ -54,10 +54,20 @@ class SubtitleStyle private constructor() {
             subtitleStyle.foregroundColor = ReactBridgeUtils.safeGetString(src, PROP_FOREGROUND_COLOR, "#FFFFFF")
             subtitleStyle.backgroundColor = ReactBridgeUtils.safeGetString(src, PROP_BACKGROUND_COLOR, "#000000")
             subtitleStyle.windowColor = ReactBridgeUtils.safeGetString(src, PROP_WINDOW_COLOR, "#00000000")
-            subtitleStyle.edgeType = ReactBridgeUtils.safeGetInt(src, PROP_EDGE_TYPE, "none")
+            subtitleStyle.edgeType = convertStringToEdgeType(ReactBridgeUtils.safeGetString(src, PROP_EDGE_TYPE, "none"))
             subtitleStyle.edgeColor = ReactBridgeUtils.safeGetString(src, PROP_EDGE_COLOR, "#00000000")
             subtitleStyle.fontFamilyPath = ReactBridgeUtils.safeGetString(src, PROP_FONT_FAMILY_PATH, null)
             return subtitleStyle
+        }
+    }
+    private fun convertStringToEdgeType(edgeTypeString: String): Int {
+        return when (edgeTypeString) {
+            "none" -> CaptionStyleCompat.EDGE_TYPE_NONE
+            "outline" -> CaptionStyleCompat.EDGE_TYPE_OUTLINE
+            "dropShadow" -> CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW
+            "raised" -> CaptionStyleCompat.EDGE_TYPE_RAISED
+            "depressed" -> CaptionStyleCompat.EDGE_TYPE_DEPRESSED
+            else -> throw IllegalArgumentException("Invalid edge type")
         }
     }
 }
