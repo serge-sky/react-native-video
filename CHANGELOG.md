@@ -1,6 +1,35 @@
 ## Changelog
 
-- Feature: playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
+## Next
+
+### Version 6.0.0-alpha.9
+- All: add built-in typescript support [#3266](https://github.com/react-native-video/react-native-video/pull/3266)
+- All: update documentation generation [#3296](https://github.com/react-native-video/react-native-video/pull/3296)
+- **BREAKING CHANGE**❗️Android: update isCodecSupported to return enum [#3254](https://github.com/react-native-video/react-native-video/pull/3254)
+- Android: use explicit not-exported flag for AudioBecomingNoisyReceiver [#3327](https://github.com/react-native-video/react-native-video/pull/3327)
+- Android: remove kotlin-android-extensions [#3299](https://github.com/react-native-video/react-native-video/pull/3299)
+- Android: ensure audio volume is changed in UI thread [3292](https://github.com/react-native-video/react-native-video/pull/3292)
+- Android: multiple internal refactor and switch to kotlin
+- Android: refactor log management and add an option to increase log verbosity [#3277](https://github.com/react-native-video/react-native-video/pull/3277)
+- iOS: Fix audio session category when not using the audioOutput prop
+- iOS: implement onPlaybackStateChanged callback [#3307](https://github.com/react-native-video/react-native-video/pull/3307)
+- iOS: remove false calls at onPlaybackRateChange [#3306](https://github.com/react-native-video/react-native-video/pull/3306)
+- iOS: audio does not work with headphones [#3284](https://github.com/react-native-video/react-native-video/pull/3284) 
+- iOS: Resuming video ad after closing the in-app browser on iOS [#3275](https://github.com/react-native-video/react-native-video/pull/3275)
+- iOS, Android: expose playback functions to ref [#3245](https://github.com/react-native-video/react-native-video/pull/3245)
+- tvOS: fix build: [#3276](https://github.com/react-native-video/react-native-video/pull/3276)
+- Windows: fix build error from over-specified SDK version [#3246](https://github.com/react-native-video/react-native-video/pull/3246)
+- Windows: fix `onError` not being raised [#3247](https://github.com/react-native-video/react-native-video/pull/3247)
+
+### Version 6.0.0-alpha.8
+- All: Playing audio over earpiece [#2887](https://github.com/react-native-video/react-native-video/issues/2887)
+- All: Prepare for fabric [#3175](https://github.com/react-native-video/react-native-video/pull/3175) [#]()
+- iOS: Fix Pip [#3221](https://github.com/react-native-video/react-native-video/pull/3221)
+- iOS: Fix regression in presentFullscreenPlayer & dismissFullscreenPlayer [#3230](https://github.com/react-native-video/react-native-video/pull/3230)
+- tvOS: Fix build [#3207](https://github.com/react-native-video/react-native-video/pull/3207)
+- tvOS: Add sample [#3208](https://github.com/react-native-video/react-native-video/pull/3208)
+- tvOS: Allow chapter customization [#3216](https://github.com/react-native-video/react-native-video/pull/3216)
+- doc: Fix internal links [#3229](https://github.com/react-native-video/react-native-video/pull/3229)
 
 ### Version 6.0.0-alpha.7
 - All: clean JS warnings (https://github.com/react-native-video/react-native-video/pull/3183)

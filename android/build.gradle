@@ -1,9 +1,9 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 buildscript {
-    def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNSAC_kotlinVersion']
+    def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') :
+            (project.properties['RNSAC_kotlinVersion'] ? project.properties['RNSAC_kotlinVersion'] : "1.6.10")
 
     repositories {
         mavenCentral()
@@ -23,11 +23,20 @@ def getExtOrDefault(name, defaultValue) {
 }
 
 def isNewArchitectureEnabled() {
-    // To opt-in for the New Architecture, you can either:
-    // - Set `newArchEnabled` to true inside the `gradle.properties` file
-    // - Invoke gradle with `-newArchEnabled=true`
-    // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
-    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
+    return rootProject.hasProperty("newArchEnabled") && rootProject.getProperty("newArchEnabled") == "true"
+}
+
+def supportsNamespace() {
+  def parsed = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')
+  def major = parsed[0].toInteger()
+  def minor = parsed[1].toInteger()
+
+  // Namespace support was added in 7.3.0
+  if (major == 7 && minor >= 3) {
+    return true
+  }
+
+  return major >= 8
 }
 
 def useExoplayerIMA = safeExtGet("RNVUseExoplayerIMA", false)
@@ -47,13 +56,29 @@ if (isNewArchitectureEnabled()) {
 }
 
 android {
-    namespace 'com.brentvatne.react'
+    if (supportsNamespace()) {
+      namespace 'com.brentvatne.react'
+
+      sourceSets {
+        main {
+          manifest.srcFile "src/main/AndroidManifestNew.xml"
+        }
+      }
+    }
+
     compileSdkVersion safeExtGet('compileSdkVersion', 31)
     buildToolsVersion safeExtGet('buildToolsVersion', '30.0.2')
 
-    compileOptions {
-        targetCompatibility JavaVersion.VERSION_1_8
-        sourceCompatibility JavaVersion.VERSION_1_8
+    def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+    if (agpVersion.tokenize('.')[0].toInteger() < 8) {
+      compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+      }
+
+      kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.majorVersion
+      }
     }
 
     defaultConfig {
@@ -68,13 +93,12 @@ android {
         }
     }
 
-    packagingOptions {
-        exclude "**/libreact_render*.so"
+    buildFeatures {
+        buildConfig true
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    packagingOptions {
+        exclude "**/libreact_render*.so"
     }
 
     buildDir 'buildOutput_' + configStringPath
@@ -131,11 +155,10 @@ dependencies {
     implementation 'com.penthera:cnc-android-sdk:5.3.10'
     implementation 'com.penthera:cnc-exoplayer-2_18-support:5.3.10'
 
-    // All support libs must use the same version
-    implementation "androidx.annotation:annotation:1.1.0"
-    implementation "androidx.core:core:1.1.0"
-    implementation "androidx.media:media:1.1.0"
-    implementation "androidx.activity:activity:1.4.0"
+    implementation "androidx.annotation:annotation:1.7.0"
+    implementation "androidx.core:core:1.9.0"
+    implementation "androidx.media:media:1.6.0"
+    implementation "androidx.activity:activity:1.6.0"
 
     implementation "com.nicepeopleatwork:exoplayer-adapter:6.7.25"
 
