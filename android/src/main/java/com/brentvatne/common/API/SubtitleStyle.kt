@@ -43,6 +43,16 @@ class SubtitleStyle private constructor() {
         private const val PROP_EDGE_TYPE = "edgeType";
         private const val PROP_EDGE_COLOR = "edgeColor";
         private const val PROP_FONT_FAMILY_PATH = "fontFamilyPath";
+        private fun convertStringToEdgeType(edgeTypeString: String): Int {
+            return when (edgeTypeString) {
+                "none" -> CaptionStyleCompat.EDGE_TYPE_NONE
+                "outline" -> CaptionStyleCompat.EDGE_TYPE_OUTLINE
+                "dropShadow" -> CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW
+                "raised" -> CaptionStyleCompat.EDGE_TYPE_RAISED
+                "depressed" -> CaptionStyleCompat.EDGE_TYPE_DEPRESSED
+                else -> throw IllegalArgumentException("Invalid edge type")
+            }
+        }
         @JvmStatic
         fun parse(src: ReadableMap?): SubtitleStyle {
             val subtitleStyle = SubtitleStyle()
@@ -58,16 +68,6 @@ class SubtitleStyle private constructor() {
             subtitleStyle.edgeColor = ReactBridgeUtils.safeGetString(src, PROP_EDGE_COLOR, "#00000000")
             subtitleStyle.fontFamilyPath = ReactBridgeUtils.safeGetString(src, PROP_FONT_FAMILY_PATH, null)
             return subtitleStyle
-        }
-    }
-    private fun convertStringToEdgeType(edgeTypeString: String): Int {
-        return when (edgeTypeString) {
-            "none" -> CaptionStyleCompat.EDGE_TYPE_NONE
-            "outline" -> CaptionStyleCompat.EDGE_TYPE_OUTLINE
-            "dropShadow" -> CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW
-            "raised" -> CaptionStyleCompat.EDGE_TYPE_RAISED
-            "depressed" -> CaptionStyleCompat.EDGE_TYPE_DEPRESSED
-            else -> throw IllegalArgumentException("Invalid edge type")
         }
     }
 }
