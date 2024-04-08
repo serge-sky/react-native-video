@@ -380,6 +380,11 @@ public class VideoEventEmitter {
         receiveEvent(EVENT_PLAYBACK_RATE_CHANGE, map);
     }
 
+    public void volumeChange(float volume) {
+        WritableMap map = Arguments.createMap();
+        map.putDouble(EVENT_PROP_VOLUME, volume);
+        receiveEvent(EVENT_VOLUME_CHANGE, map);
+    }
 
     public void timedMetadata(ArrayList<TimedMetadata> _metadataArrayList) {
         if (_metadataArrayList.size() == 0) {
