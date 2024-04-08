@@ -17,7 +17,6 @@
     },
     "devDependencies": {
         "@react-native-community/eslint-config": "^0.0.5",
-        "@release-it/conventional-changelog": "^7.0.2",
         "@types/jest": "^28.1.2",
         "@types/react": "~18.0.0",
         "@types/react-native": "0.72.3",
