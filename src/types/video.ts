@@ -21,6 +21,7 @@ export type ReactVideoSource = Readonly<{
   subtitle?: string;
   description?: string;
   customImageUri?: string;
+  assetId?: string;
 }>;
 
 export type DebugConfig = Readonly<{

@@ -120,7 +120,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const src = useMemo(() => {
       if (!source) {
-        return undefined;
+        return {};
       }
 
       const resolvedSource = resolveAssetSourceForVideo(source);
@@ -154,6 +154,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         subtitle: resolvedSource.subtitle,
         description: resolvedSource.description,
         customImageUri: resolvedSource.customImageUri,
+        assetId: resolvedSource.assetId,
       };
     }, [source]);
 
