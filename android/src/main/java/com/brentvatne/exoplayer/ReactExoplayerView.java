@@ -843,7 +843,7 @@ class ReactExoplayerView extends FrameLayout implements
         applyModifiers();
         startBufferCheckTimer();
 
-        if (player != null && youboraPlugin == null && (analyticsMeta != null && contentId != analyticsMeta.getString("contentId"))) {
+        if (player != null && youboraPlugin == null && (analyticsMeta != null && !analyticsMeta.getBoolean("contentIsLive") && contentId != analyticsMeta.getString("contentId"))) {
             initialiseYoubora();
         }
     }
@@ -1684,12 +1684,6 @@ class ReactExoplayerView extends FrameLayout implements
                             this.requestHeaders);
 
             if (!isSourceEqual) {
-                if (youboraPlugin != null) {
-                    youboraPlugin.getAdapter().unregisterListeners();
-                    youboraPlugin.getAdapter().fireStop();
-                    youboraPlugin = null;
-                    contentId = null;
-                }
                 reloadSource();
             }
         }
@@ -2211,6 +2205,19 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void setAnalyticsMeta(ReadableMap analyticsData) {
         this.analyticsMeta = analyticsData;
+            
+        if(player != null) {
+            //init youbora when player is loaded and youbora is not initalized, also the content need to be live tv and analyticMeta is not nuil and not the same as current
+          if ( analyticsMeta != null && youboraPlugin == null &&  analyticsMeta.getBoolean("contentIsLive")){
+            initialiseYoubora();       
+          }  
+          if( analyticsMeta == null && youboraPlugin != null && youboraPlugin.getAdapter() != null) {
+            //stop youbora when player is loaded and youbora is initalized and analyticMeta nuil
+            youboraPlugin.getAdapter().unregisterListeners();
+            youboraPlugin.getAdapter().fireStop();
+            youboraPlugin = null;
+          }
+        }  
     }
 
     public void setAssetId(String assetId) {
