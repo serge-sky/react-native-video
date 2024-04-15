@@ -186,6 +186,7 @@ class VideoEventEmitter {
                 WritableMap audioTrack = Arguments.createMap();
                 audioTrack.putInt("index", i);
                 audioTrack.putString("title", format.m_title != null ? format.m_title : "");
+                audioTrack.putString("label", format.m_label != null ? format.m_label : "");
                 audioTrack.putString("type", format.m_mimeType != null ? format.m_mimeType : "");
                 audioTrack.putString("language", format.m_language != null ? format.m_language : "");
                 audioTrack.putInt("bitrate", format.m_bitrate);
