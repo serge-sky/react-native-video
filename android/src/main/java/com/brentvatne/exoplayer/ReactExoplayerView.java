@@ -1321,7 +1321,7 @@ class ReactExoplayerView extends FrameLayout implements
             Format format = group.getFormat(0);
             Track audioTrack = new Track();
             audioTrack.m_index = i;
-            audioTrack.m_title = format.id != null ? format.id : "";
+            audioTrack.m_title = format.label != null ? format.label : "";
             audioTrack.m_mimeType = format.sampleMimeType;
             audioTrack.m_language = format.language != null ? format.language : "";
             audioTrack.m_bitrate = format.bitrate == Format.NO_VALUE ? 0 : format.bitrate;
