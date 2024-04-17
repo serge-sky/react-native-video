@@ -269,14 +269,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _analyticsMeta = analyticsMeta
 
         if (_plugin != nil &&
-            _analyticsMeta == nil) {
+            _contentId != _analyticsMeta.object(forKey: "contentId") as! String) {
 
             _plugin?.removeAdapter()
             _plugin?.fireStop()
-            _plugin = nil
-        }
-
-        if(_plugin == nil && _analyticsMeta != nil) {
             initAnalytics()
         }
     }
@@ -386,6 +382,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerObserver.player = self._player
                     self.applyModifiers()
                     self._player?.actionAtItemEnd = .none
+
+                    if (self._analyticsMeta != nil) {
+                        let origin:String = self._analyticsMeta.object(forKey: "origin") as? String ?? ""
+                        if (origin.count == 0)
+                        {
+                            self.initAnalytics()
+                        }
+                    }
 
 
                     if #available(iOS 10.0, *) {
