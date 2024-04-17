@@ -1627,6 +1627,9 @@ class ReactExoplayerView extends FrameLayout implements
                 break;
         }
         eventEmitter.error(errorString, e, errorCode);
+        if (youboraPlugin != null) {
+          youboraPlugin.getAdapter().fireFatalError("ExoPlayer", errorCode, errorString);
+        }
         playerNeedsSource = true;
         playerNeedsNewLicence = true;
         if (isBehindLiveWindow(e)) {
