@@ -274,7 +274,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _plugin = nil
         }
 
-        if(_plugin == nil && _analyticsMeta != nil) {
+        if(_plugin == nil && _analyticsMeta != nil && _contentId != _analyticsMeta.object(forKey: "contentId") as! String) {
             initAnalytics()
         }
     }
