@@ -69,7 +69,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterEnabled:Bool = false
     private var _presentingViewController:UIViewController?
     private var _contentId:String!
-    private var _analyticsMeta:NSDictionary? = NSDictionary()
+    private var _analyticsMeta:NSDictionary = NSDictionary()
 
     /* IMA Ads */
     private var _adTagUrl:String?
@@ -265,27 +265,27 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
-    func setAnalyticsMeta(_ analyticsMeta:NSDictionary?) {
+    func setAnalyticsMeta(_ analyticsMeta:NSDictionary) {
         _analyticsMeta = analyticsMeta
+        let hasAnalyticsMeta = _analyticsMeta.allKeys.count != 0
 
-        if (_plugin != nil && _analyticsMeta == nil) {
+        if (_plugin != nil && !hasAnalyticsMeta) {
             _plugin?.removeAdapter()
             _plugin?.fireStop()
             _plugin = nil
         }
 
-        if(_plugin == nil && _analyticsMeta != nil) {
+        if(_plugin == nil && hasAnalyticsMeta) {
             initAnalytics()
         }
     }
 
     @objc
     func initAnalytics() {
-        if (_analyticsMeta == nil) {
-            DebugLog("No youbora analytics data")
+        if (_analyticsMeta.allKeys.count == 0 || _player == nil) {
+            DebugLog("No youbora analytics data or player not initialized")
             return
         }
-
         YBLog.setDebugLevel(YBLogLevel.verbose)
 
         let options = YBOptions()
@@ -408,6 +408,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         "drm": self._drm?.json ?? NSNull(),
                         "target": self.reactTag
                     ])
+                    initAnalytics();
                 }.catch{_ in }
             self._videoLoadStarted = true
         }
