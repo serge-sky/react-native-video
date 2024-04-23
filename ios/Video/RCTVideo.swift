@@ -69,7 +69,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _filterEnabled:Bool = false
     private var _presentingViewController:UIViewController?
     private var _contentId:String!
-    private var _analyticsMeta:NSDictionary = NSDictionary()
+    private var _analyticsMeta:NSDictionary? = NSDictionary()
 
     /* IMA Ads */
     private var _adTagUrl:String?
@@ -265,7 +265,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc
-    func setAnalyticsMeta(_ analyticsMeta:NSDictionary) {
+    func setAnalyticsMeta(_ analyticsMeta:NSDictionary?) {
         _analyticsMeta = analyticsMeta
 
         if (_plugin != nil && _analyticsMeta == nil) {
