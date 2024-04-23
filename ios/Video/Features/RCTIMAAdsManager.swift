@@ -2,17 +2,19 @@
 import Foundation
 import GoogleInteractiveMediaAds
 
-class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
+class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate, IMALinkOpenerDelegate {
 
     private weak var _video: RCTVideo?
+    private var _pipEnabled:() -> Bool
 
     /* Entry point for the SDK. Used to make ad requests. */
     private var adsLoader: IMAAdsLoader!
     /* Main point of interaction with the SDK. Created by the SDK as the result of an ad request. */
     private var adsManager: IMAAdsManager!
 
-    init(video:RCTVideo!) {
+    init(video:RCTVideo!, pipEnabled:@escaping () -> Bool) {
         _video = video
+        _pipEnabled = pipEnabled
 
         super.init()
     }
@@ -63,6 +65,7 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
 
         // Create ads rendering settings and tell the SDK to use the in-app browser.
         let adsRenderingSettings: IMAAdsRenderingSettings = IMAAdsRenderingSettings();
+        adsRenderingSettings.linkOpenerDelegate = self;
         adsRenderingSettings.linkOpenerPresentingController = _video.reactViewController();
 
         adsManager.initialize(with: adsRenderingSettings)
@@ -86,6 +89,9 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
         }
         // Play each ad once it has been loaded
         if event.type == IMAAdEventType.LOADED {
+            if (_pipEnabled()) {
+                return
+            }
             adsManager.start()
         }
 
@@ -118,6 +124,12 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
         // Resume the content since the SDK is done playing ads (at least for now).
         _video?.setAdPlaying(false)
         _video?.setPaused(false)
+    }
+
+    // MARK: - IMALinkOpenerDelegate
+
+    func linkOpenerDidClose(inAppLink linkOpener: NSObject) {
+        adsManager?.resume()
     }
 
     // MARK: - Helpers

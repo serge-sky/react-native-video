@@ -14,6 +14,7 @@ RCT_EXPORT_VIEW_PROPERTY(allowsExternalPlayback, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(textTracks, NSArray);
 RCT_EXPORT_VIEW_PROPERTY(selectedTextTrack, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(selectedAudioTrack, NSDictionary);
+RCT_EXPORT_VIEW_PROPERTY(chapters, NSArray);
 RCT_EXPORT_VIEW_PROPERTY(paused, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(muted, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(controls, BOOL);
@@ -43,7 +44,7 @@ RCT_EXPORT_VIEW_PROPERTY(onVideoLoad, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoBuffer, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoError, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoProgress, RCTDirectEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onBandwidthUpdate, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoBandwidthUpdate, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoSeek, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoEnd, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onTimedMetadata, RCTDirectEventBlock);
@@ -56,6 +57,8 @@ RCT_EXPORT_VIEW_PROPERTY(onReadyForDisplay, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackStalled, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackResume, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlaybackRateChange, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVolumeChange, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onVideoPlaybackStateChanged, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoExternalPlaybackChange, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onGetLicense, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(analyticsMeta, NSDictionary);
@@ -69,9 +72,21 @@ RCT_EXTERN_METHOD(save:(NSDictionary *)options
         rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(setLicenseResult:(NSString *)license
+         licenseUrl:(NSString *)licenseUrl
          reactTag:(nonnull NSNumber *)reactTag)
 
-RCT_EXTERN_METHOD(setLicenseResultError(NSString *)error
+RCT_EXTERN_METHOD(setLicenseResultError:(NSString *)error
+         licenseUrl:(NSString *)licenseUrl
+         reactTag:(nonnull NSNumber *)reactTag)
+
+RCT_EXTERN_METHOD(setPlayerPauseState:(nonnull NSNumber *)paused
+                 reactTag:(nonnull NSNumber *)reactTag)
+
+RCT_EXTERN_METHOD(presentFullscreenPlayer:(nonnull NSNumber *)reactTag)
+
+RCT_EXTERN_METHOD(dismissFullscreenPlayer:(nonnull NSNumber *)reactTag)
+
+RCT_EXTERN_METHOD(dismissFullscreenPlayer
                  reactTag:(nonnull NSNumber *)reactTag)
 
 @end

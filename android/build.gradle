@@ -1,9 +1,10 @@
+import com.android.Version
+
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 buildscript {
-    def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNSAC_kotlinVersion']
+    def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNVideo_kotlinVersion']
 
     repositories {
         mavenCentral()
@@ -14,8 +15,8 @@ buildscript {
     }
 }
 
-def safeExtGet(prop, fallback) {
-    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+def safeExtGet(prop) {
+    return rootProject.ext.has(prop) ? rootProject.ext.get(prop) : project.properties["RNVideo_" + prop]
 }
 
 def getExtOrDefault(name, defaultValue) {
@@ -23,14 +24,23 @@ def getExtOrDefault(name, defaultValue) {
 }
 
 def isNewArchitectureEnabled() {
-    // To opt-in for the New Architecture, you can either:
-    // - Set `newArchEnabled` to true inside the `gradle.properties` file
-    // - Invoke gradle with `-newArchEnabled=true`
-    // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
-    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
+    return rootProject.hasProperty("newArchEnabled") && rootProject.getProperty("newArchEnabled") == "true"
 }
 
-def useExoplayerIMA = safeExtGet("RNVUseExoplayerIMA", false)
+def supportsNamespace() {
+  def parsed = Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')
+  def major = parsed[0].toInteger()
+  def minor = parsed[1].toInteger()
+
+  // Namespace support was added in 7.3.0
+  if (major == 7 && minor >= 3) {
+    return true
+  }
+
+  return major >= 8
+}
+
+def useExoplayerIMA = getExtOrDefault("RNVUseExoplayerIMA", false)
 
 println "useExoplayerIMA:" + useExoplayerIMA
 
@@ -47,18 +57,34 @@ if (isNewArchitectureEnabled()) {
 }
 
 android {
-    namespace 'com.brentvatne.react'
-    compileSdkVersion safeExtGet('compileSdkVersion', 31)
-    buildToolsVersion safeExtGet('buildToolsVersion', '30.0.2')
+    if (supportsNamespace()) {
+      namespace 'com.brentvatne.react'
 
-    compileOptions {
-        targetCompatibility JavaVersion.VERSION_1_8
-        sourceCompatibility JavaVersion.VERSION_1_8
+      sourceSets {
+        main {
+          manifest.srcFile "src/main/AndroidManifestNew.xml"
+        }
+      }
+    }
+
+    compileSdkVersion safeExtGet('compileSdkVersion')
+    buildToolsVersion safeExtGet('buildToolsVersion')
+
+    def agpVersion = Version.ANDROID_GRADLE_PLUGIN_VERSION
+    if (agpVersion.tokenize('.')[0].toInteger() < 8) {
+      compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+      }
+
+      kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.majorVersion
+      }
     }
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 21)
-        targetSdkVersion safeExtGet('targetSdkVersion', 28)
+        minSdkVersion safeExtGet('minSdkVersion')
+        targetSdkVersion safeExtGet('targetSdkVersion')
         versionCode 1
         versionName "1.0"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
@@ -68,13 +94,12 @@ android {
         }
     }
 
-    packagingOptions {
-        exclude "**/libreact_render*.so"
+    buildFeatures {
+        buildConfig true
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    packagingOptions {
+        exclude "**/libreact_render*.so"
     }
 
     buildDir 'buildOutput_' + configStringPath
@@ -120,10 +145,13 @@ repositories {
     mavenCentral()
 }
 
-def kotlin_version = getExtOrDefault('kotlinVersion', project.properties['RNSAC_kotlinVersion'])
+def kotlin_version = safeExtGet('kotlinVersion')
 
 dependencies {
-    implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    // For < 0.71, this will be from the local maven repo
+    // For > 0.71, this will be replaced by `com.facebook.react:react-android:$version` by react gradle plugin
+    //noinspection GradleDynamicVersion
+    implementation "com.facebook.react:react-native:+"
     implementation('com.google.android.exoplayer:exoplayer:2.18.1') {
         exclude group: 'com.android.support'
     }
@@ -131,11 +159,10 @@ dependencies {
     implementation 'com.penthera:cnc-android-sdk:5.3.10'
     implementation 'com.penthera:cnc-exoplayer-2_18-support:5.3.10'
 
-    // All support libs must use the same version
-    implementation "androidx.annotation:annotation:1.1.0"
-    implementation "androidx.core:core:1.1.0"
-    implementation "androidx.media:media:1.1.0"
-    implementation "androidx.activity:activity:1.4.0"
+    implementation "androidx.annotation:annotation:1.7.0"
+    implementation "androidx.core:core:1.9.0"
+    implementation "androidx.media:media:1.6.0"
+    implementation "androidx.activity:activity:1.6.0"
 
     implementation "com.nicepeopleatwork:exoplayer-adapter:6.7.25"
 
