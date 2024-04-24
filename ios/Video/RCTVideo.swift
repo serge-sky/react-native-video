@@ -70,7 +70,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _presentingViewController:UIViewController?
     private var _contentId:String!
     private var _analyticsMeta:NSDictionary = NSDictionary()
-
+    private var _playerInited:Bool = false
     /* IMA Ads */
     private var _adTagUrl:String?
 #if USE_GOOGLE_IMA
@@ -408,7 +408,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         "drm": self._drm?.json ?? NSNull(),
                         "target": self.reactTag
                     ])
-                    initAnalytics();
+
+                    if (!_playerInited) {
+                     _playerInited = true;
+                     initAnalytics();
+                    }
+                    
                 }.catch{_ in }
             self._videoLoadStarted = true
         }
