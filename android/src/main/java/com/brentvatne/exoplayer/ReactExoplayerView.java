@@ -386,7 +386,6 @@ class ReactExoplayerView extends FrameLayout implements
     public void onHostDestroy() {
         mainHandler.removeCallbacksAndMessages(null);
         stopPlayback();
-        themedReactContext.removeLifecycleEventListener(this);
     }
 
     public void cleanUpResources() {
@@ -1070,6 +1069,7 @@ class ReactExoplayerView extends FrameLayout implements
         }
         adsLoader = null;
         progressHandler.removeMessages(SHOW_PROGRESS);
+        themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
         bandwidthMeter.removeEventListener(this);
     }
