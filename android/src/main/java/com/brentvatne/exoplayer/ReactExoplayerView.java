@@ -615,11 +615,13 @@ class ReactExoplayerView extends FrameLayout implements
         Activity activity = themedReactContext.getCurrentActivity();
         if (activity == null) return;
 
-        youboraPlugin.setActivity(activity);
-        if (player != null && youboraPlugin != null && youboraPlugin.getAdapter() == null) {
-            Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
-            youboraPlugin.setAdapter(adapter);
-            youboraPlugin.getAdapter().fireStart();
+        if (player != null && youboraPlugin != null) {
+            youboraPlugin.setActivity(activity);
+            if(youboraPlugin.getAdapter() == null) {
+                Exoplayer2Adapter adapter = new Exoplayer2Adapter(player);
+                youboraPlugin.setAdapter(adapter);
+                youboraPlugin.getAdapter().fireStart();
+            }
         }
     }
 
@@ -999,7 +1001,7 @@ class ReactExoplayerView extends FrameLayout implements
             player.removeListener(this);
             trackSelector = null;
             player = null;
-            if (youboraPlugin != null) {
+            if (youboraPlugin != null && youboraPlugin.getAdapter() != null) {
                 youboraPlugin.getAdapter().unregisterListeners();
                 youboraPlugin.getAdapter().fireStop();
                 youboraPlugin = null;
@@ -1570,7 +1572,10 @@ class ReactExoplayerView extends FrameLayout implements
                 break;
         }
         eventEmitter.error(errorString, e, errorCode);
-        youboraPlugin.getAdapter().fireFatalError("ExoPlayer", errorCode, errorString);
+        if(youboraPlugin != null && youboraPlugin.getAdapter() != null)
+        {
+            youboraPlugin.getAdapter().fireFatalError("ExoPlayer", errorCode, errorString);
+        }
         playerNeedsSource = true;
         playerNeedsNewLicence = true;
         if (isBehindLiveWindow(e)) {
