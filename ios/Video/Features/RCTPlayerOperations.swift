@@ -197,7 +197,7 @@ enum RCTPlayerOperations {
         var options:AVAudioSession.CategoryOptions? = nil
 
         if (ignoreSilentSwitch == "ignore") {
-            category = AVAudioSession.Category.playAndRecord
+            category = AVAudioSession.Category.playback
         } else if (ignoreSilentSwitch == "obey") {
             category = AVAudioSession.Category.ambient
         }
