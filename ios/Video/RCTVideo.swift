@@ -193,11 +193,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     @objc func applicationDidEnterBackground(notification:NSNotification!) {
-        if !_playInBackground {
-            // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
-            _playerLayer?.player = nil
-            _playerViewController?.player = nil
-        }
+       if _playInBackground {
+           // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
+           _playerLayer?.player = nil
+           _playerViewController?.player = nil
+       }
     }
 
     @objc func applicationWillEnterForeground(notification:NSNotification!) {
