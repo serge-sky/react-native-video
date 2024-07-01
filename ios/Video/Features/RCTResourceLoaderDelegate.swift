@@ -111,6 +111,11 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         
         return true
     }
+
+    public func reset(){
+        //Airplay support changes
+        _requestingCertificate = false;
+    }
     
     func handleDrm(_ loadingRequest:AVAssetResourceLoadingRequest!) -> Bool {
         if _requestingCertificate {
