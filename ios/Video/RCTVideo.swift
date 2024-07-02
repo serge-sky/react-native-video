@@ -1206,6 +1206,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func handleExternalPlaybackActiveChange(player: AVPlayer, change: NSKeyValueObservedChange<Bool>) {
         guard let _player = _player else { return }
+         /**
+           * @TODO reset handler is added as a patch fix for handling airplay playback, Upgrading to v6.0.0 will fix this issue permantely and don't need the reset handler.
+         */
+        _resouceLoaderDelegate?.reset();
         onVideoExternalPlaybackChange?(["isExternalPlaybackActive": NSNumber(value: _player.isExternalPlaybackActive),
                                         "target": reactTag as Any])
     }

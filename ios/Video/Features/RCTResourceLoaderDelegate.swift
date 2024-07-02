@@ -111,6 +111,13 @@ class RCTResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSes
         
         return true
     }
+
+    public func reset(){
+         /**
+           * @TODO reset handler is added as a patch fix for handling airplay playback, Upgrading to v6.0.0 will fix this issue permantely and don't need the reset handler.
+         */
+        _requestingCertificate = false;
+    }
     
     func handleDrm(_ loadingRequest:AVAssetResourceLoadingRequest!) -> Bool {
         if _requestingCertificate {
