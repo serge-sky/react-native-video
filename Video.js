@@ -301,7 +301,7 @@ export default class Video extends Component {
       this.setNativeProps({
         allowsExternalPlayback: false,
       });
-    } 
+    }
   }
   render() {
     const resizeMode = this.props.resizeMode;
