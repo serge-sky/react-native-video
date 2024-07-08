@@ -293,6 +293,17 @@ export default class Video extends Component {
     return UIManager.getViewManagerConfig(viewManagerName);
   };
 
+  componentWillUnmount() {
+      /**
+           * @TODO reset handler is added as a patch fix for handling airplay playback to release the stream , Upgrading to v6.0.0 will fix this issue permantely and don't need the reset handler.
+         */
+    if (Platform.OS === 'ios') {
+      this.setNativeProps({
+        allowsExternalPlayback: false
+      });
+    } 
+  }
+
   render() {
     const resizeMode = this.props.resizeMode;
     const source = resolveAssetSource(this.props.source) || {};
