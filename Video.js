@@ -299,11 +299,10 @@ export default class Video extends Component {
          */
     if (Platform.OS === 'ios') {
       this.setNativeProps({
-        allowsExternalPlayback: false
+        allowsExternalPlayback: false,
       });
     } 
   }
-
   render() {
     const resizeMode = this.props.resizeMode;
     const source = resolveAssetSource(this.props.source) || {};
