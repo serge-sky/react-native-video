@@ -474,6 +474,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setAllowsExternalPlayback(_ allowsExternalPlayback:Bool) {
+          /**
+           * @TODO reset handler is added as a patch fix for handling airplay playback, Upgrading to v6.0.0 will fix this issue permantely and don't need the reset handler.
+         */
+        _resouceLoaderDelegate?.reset();
         _allowsExternalPlayback = allowsExternalPlayback
         _player?.allowsExternalPlayback = _allowsExternalPlayback
     }
