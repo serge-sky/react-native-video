@@ -296,9 +296,10 @@ public final class ExoPlayerView extends FrameLayout implements AdViewProvider {
 
         @Override
         public void onCues(List<Cue> cues) {
+            final float LINE_POSITION = 0.8f;
             List<Cue> updatedCues = new ArrayList<>();
             for (Cue cue : cues) {
-                updatedCues.add(new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, Cue.TYPE_UNSET, Cue.LINE_TYPE_FRACTION, Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET, cue.size));
+                updatedCues.add(new Cue(cue.text, Layout.Alignment.ALIGN_CENTER, LINE_POSITION, Cue.LINE_TYPE_FRACTION, Cue.TYPE_UNSET, Cue.DIMEN_UNSET, Cue.TYPE_UNSET, cue.size));
             }
             subtitleLayout.setCues(updatedCues);
         }
