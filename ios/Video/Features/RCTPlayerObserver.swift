@@ -23,9 +23,10 @@ protocol RCTPlayerObserverHandler: RCTPlayerObserverHandlerObjc {
     func handleViewControllerOverlayViewFrameChange(overlayView:UIView, change:NSKeyValueObservedChange<CGRect>)
 }
 
-class RCTPlayerObserver: NSObject {
+class RCTPlayerObserver: NSObject,AVPlayerItemMetadataOutputPushDelegate,AVPlayerItemLegibleOutputPushDelegate {
 
     weak var _handlers: RCTPlayerObserverHandler?
+    var legibleOutput : AVPlayerItemLegibleOutput?
     
     var player:AVPlayer? {
         willSet {
@@ -39,13 +40,22 @@ class RCTPlayerObserver: NSObject {
             }
         }
     }
+    
+    var subtitleStyle: SubtitleStyle?
+
     var playerItem:AVPlayerItem? {
         willSet {
             removePlayerItemObservers()
+            legibleOutput = nil //clearing the memory
         }
         didSet {
             if playerItem != nil {
                 addPlayerItemObservers()
+                legibleOutput = AVPlayerItemLegibleOutput()
+                playerItem!.add(legibleOutput!)
+                legibleOutput?.setDelegate(self, queue: .main)
+                //required to set the subtitle on load of the player 
+                legibleOutput?.suppressesPlayerRendering = subtitleStyle?.opacity == 0 ? true : false
             }
         }
     }
