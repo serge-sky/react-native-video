@@ -899,6 +899,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _playerObserver.playerLayer = nil
     }
 
+    @objc
+    func setSubtitleStyle(_ style: [String: Any]) {
+        let subtitleStyle = SubtitleStyle.parse(from: style)
+        _playerObserver.subtitleStyle = subtitleStyle;
+        // Added this to control the disabling and enabling of the subtitle from modal language selection
+        _playerObserver.legibleOutput?.suppressesPlayerRendering = subtitleStyle.opacity == 0 ? true : false 
+    }
+
     // MARK: - RCTVideoPlayerViewControllerDelegate
 
     func videoPlayerViewControllerWillDismiss(playerViewController:AVPlayerViewController) {
