@@ -108,7 +108,7 @@ import com.npaw.youbora.lib6.YouboraLog;
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter;
 import com.npaw.youbora.lib6.plugin.Options;
 import com.npaw.youbora.lib6.plugin.Plugin;
-
+import android.media.MediaDrm;
 import java.io.IOException;
 
 import com.google.common.collect.ImmutableList;
@@ -395,7 +395,6 @@ class ReactExoplayerView extends FrameLayout implements
                 int height = videoFormat != null ? videoFormat.height : 0;
                 String trackId = videoFormat != null ? videoFormat.id : "-1";
                 eventEmitter.bandwidthReport(bitrate, height, width, String.valueOf(hdcp));
-            }
         }
     }
 
