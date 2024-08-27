@@ -395,6 +395,7 @@ class ReactExoplayerView extends FrameLayout implements
                 int height = videoFormat != null ? videoFormat.height : 0;
                 String trackId = videoFormat != null ? videoFormat.id : "-1";
                 eventEmitter.bandwidthReport(bitrate, height, width, String.valueOf(hdcp));
+            }
         }
     }
 
