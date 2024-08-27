@@ -250,6 +250,7 @@ class ReactExoplayerView extends FrameLayout implements
     private long lastPos = -1;
     private long lastBufferDuration = -1;
     private long lastDuration = -1;
+    private int hdcp = 0;
 
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -393,7 +394,7 @@ class ReactExoplayerView extends FrameLayout implements
                 int width = videoFormat != null ? videoFormat.width : 0;
                 int height = videoFormat != null ? videoFormat.height : 0;
                 String trackId = videoFormat != null ? videoFormat.id : "-1";
-                eventEmitter.bandwidthReport(bitrate, height, width, trackId);
+                eventEmitter.bandwidthReport(bitrate, height, width, String.valueOf(hdcp));
             }
         }
     }
@@ -843,6 +844,9 @@ class ReactExoplayerView extends FrameLayout implements
             HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl,
                     buildHttpDataSourceFactory(false));
             FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(uuid);
+            try (MediaDrm mediaDrmTemp = new MediaDrm(uuid)) {
+                  hdcp = mediaDrmTemp.getConnectedHdcpLevel();
+            }
             if (keyRequestPropertiesArray != null) {
                 for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
                     drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i], keyRequestPropertiesArray[i + 1]);
