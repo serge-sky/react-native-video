@@ -86,8 +86,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SUBTITLE_STYLE = "subtitleStyle";
     private static final String PROP_SHUTTER_COLOR = "shutterColor";
     private static final String PROP_ANALYTICS_META = "analyticsMeta";
-    private static final String PROP_LICENCE_PERSISTENCE_ENABLED = "licencePersistenceEnabled";
-    private static final String PROP_LICENCE_MULTI_SESSION_ENABLED = "licenceMultiSessionEnabled";
     private static final String PROP_FF_RW = "fastForwardOrRewind";
 
     private ReactExoplayerConfig config;
@@ -438,15 +436,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         videoView.setAnalyticsMeta(analyticsMeta);
     }
 
-    @ReactProp(name = PROP_LICENCE_PERSISTENCE_ENABLED, defaultBoolean = false)
-    public void setPropLicencePersistenceEnabled(final ReactExoplayerView videoView, final boolean isEnabled) {
-        videoView.setLicencePersistingEnabled(isEnabled);
-    }
-
-    @ReactProp(name = PROP_LICENCE_MULTI_SESSION_ENABLED, defaultBoolean = false)
-    public void setPropLicenceMultiSessionEnabled(final ReactExoplayerView videoView, final boolean isEnabled) {
-        videoView.setLicenceMultiSessionEnabled(isEnabled);
-    }
 
     @ReactProp(name = PROP_FF_RW)
     public void fastForwardOrRewind(final ReactExoplayerView videoView, final String incrementMs) {
