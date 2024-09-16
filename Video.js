@@ -266,6 +266,9 @@ export default class Video extends Component {
         const getLicenseOverride = this.props.drm.getLicense(data.spcBase64, data.contentId, data.licenseUrl);
         const getLicensePromise = Promise.resolve(getLicenseOverride); // Handles both scenarios, getLicenseOverride being a promise and not.
         getLicensePromise.then((result => {
+          if(!this._root){
+            return
+          }
           if (result !== undefined) {
             NativeModules.VideoManager.setLicenseResult(result, findNodeHandle(this._root));
           } else {
