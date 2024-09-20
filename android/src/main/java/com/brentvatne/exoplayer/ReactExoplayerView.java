@@ -231,8 +231,6 @@ class ReactExoplayerView extends FrameLayout implements
     private String drmLicenseUrl = null;
     private String[] drmLicenseHeader = null;
     private String assetId = null;
-    private boolean licencePersistingEnabled = false;
-    private boolean licenceMultiSessionEnabled = false;
     private boolean controls;
     private ReadableMap analyticsMeta;
     private Uri adTagUrl;
@@ -647,7 +645,6 @@ class ReactExoplayerView extends FrameLayout implements
                     if (playerNeedsSource && srcUri != null) {
                         exoPlayerView.invalidateAspectRatio();
 
-                        cacheLicense();
 
                         // DRM session manager creation must be done on a different thread to prevent crashes so we start a new thread
                         ExecutorService es = Executors.newSingleThreadExecutor();
@@ -853,14 +850,8 @@ class ReactExoplayerView extends FrameLayout implements
                 mediaDrm.setPropertyString("securityLevel", "L3");
             }
             DefaultDrmSessionManager drmSessionManager = new DefaultDrmSessionManager(uuid, mediaDrm, drmCallback,
-                    null, this.licenceMultiSessionEnabled, 3);
+                    null, false, 3);
 
-            if (licencePersistingEnabled) {
-                byte[] key = LicencesDataStore.getLicence(this.assetId);
-                if (key != null) {
-                    drmSessionManager.setMode(MODE_PLAYBACK, key);
-                }
-            }
             return drmSessionManager;
         } catch(UnsupportedDrmException ex) {
             // Unsupported DRM exceptions are handled by the calling method
@@ -2173,14 +2164,6 @@ class ReactExoplayerView extends FrameLayout implements
         this.assetId = assetId;
     }
 
-    public void setLicencePersistingEnabled(boolean isEnabled) {
-        this.licencePersistingEnabled = isEnabled;
-    }
-
-    public void setLicenceMultiSessionEnabled(boolean isEnabled) {
-        this.licenceMultiSessionEnabled = isEnabled;
-    }
-
     @Override
     public void onDrmKeysLoaded(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
         Log.d("DRM Info", "onDrmKeysLoaded");
@@ -2220,53 +2203,6 @@ class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    @SuppressLint("CheckResult")
-    private void cacheLicense() {
-        if (licencePersistingEnabled) {
-            Map<String, String> existingLicense = LicencesDataStore.getCachedLicence(assetId);
-            boolean licenceServerChanged = existingLicense != null && !drmLicenseUrl.equals(existingLicense.get(LicencesDataStore.LICENCE_URL));
-            if (existingLicense == null || playerNeedsNewLicence || licenceServerChanged) {
-                Single.fromCallable(() -> {
-                            try {
-                                HttpDataSource httpDataSource = httpDataSourceFactory.createDataSource();
-                                DashManifest dashManifest = DashUtil.loadManifest(httpDataSource, srcUri);
-                                Format drmInitDataFormat = DashUtil.loadFormatWithDrmInitData(httpDataSource, dashManifest.getPeriod(0));
-                                OfflineLicenseHelper offlineLicenseHelper = OfflineLicenseHelper
-                                        .newWidevineInstance(drmLicenseUrl, true, httpDataSourceFactory, new DrmSessionEventListener.EventDispatcher());
-
-                                if (assetId != null && !"".equals(assetId) && drmInitDataFormat != null) {
-                                    byte[] key = offlineLicenseHelper.downloadLicense(drmInitDataFormat);
-                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                                        Pair<Long, Long> licenseDuration = offlineLicenseHelper.getLicenseDurationRemainingSec(key);
-                                    }
-                                    return key;
-                                }
-                                return null;
-
-                            } catch (Exception e) {
-                                Log.i("DRM LICENCE CACHING", "Failed to acquire offline license", e);
-                            }
-
-                            return null;
-                        }).subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread()).subscribe(new DisposableSingleObserver<byte[]>() {
-                            @Override
-                            public void onSuccess(byte[] license) {
-                                LicencesDataStore.storeLicense(assetId, drmLicenseUrl, license);
-                                playerNeedsNewLicence = false;
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.i("DRM LICENCE CACHING", "Failed to acquire offline license", e);
-                                if (existingLicense != null) {
-                                    LicencesDataStore.removeLicence(assetId);
-                                }
-                            }
-                        });
-            }
-        }
-    }
 
     public void setSubtitleStyle(SubtitleStyle style) {
         exoPlayerView.setSubtitleStyle(style);
